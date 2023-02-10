@@ -1,0 +1,39 @@
+[intro]
+    -"conditionally-supported": diag required if not supported
+    -diag required for language extensions
+
+    Observable behaviour:
+        -access through volatile glvalue
+        -data written to a file
+        -interactive output prompts are delivered before waiting for input
+
+[lex]
+    [lex.phases]
+        -non-BSCS characters are theoretically stored as UCNs, but can be stored directly provided they function the same
+        -line splicing isn't done recursively
+        -PP lexing is context-sensitive: header-name is formed only in a few contexts
+        -newlines are retained during PP lexing so that PP directives terminate properly
+
+    [lex.charset]
+        -basic source character set (BSCS) whitespace includes space, tab, vertical tab, form feed, newline
+            -BSCS does not include @ or $ or `
+        -UCNs outside of char/string literals can't be control character or in BSCS
+        -basic execution character set (BECS) has BSCS + {\a, \b, \r, \0}
+    [lex.pptoken]
+        -"import-keyword", "module-keyword", and "export-keyword" are placeholder tokens from preprocessing import and module directives
+        -lexing mandates that R" and similar raw string introducers actually introduce a raw string literal
+        -UCNs remain as-is in raw strings, as well as extended characters in the source and backslash-newlines
+            -if one is reverted, this is done before looking for delim/paren/string characters
+        -the sequence <:: is treated as < :: instead of <: : unless next character is : or >
+    [lex.digraph]
+        -the spelling of alternative tokens is retained when stringizing and concatenating
+    [lex.header]
+        -characters in <> can be anything except > and newline
+        -characters in "" can be anything except " and newline
+    [lex.ppnumber]
+        -can include UCNs because of UDLs
+        -loose grammar covers integer and floating-point literals without requiring analysis
+    [lex.name]
+        -module, import, override, final are soft keywords
+    [lex.icon]
+        -integer literal types depend on value, suffix, and base: http://eel.is/c++draft/tab:lex.icon.type

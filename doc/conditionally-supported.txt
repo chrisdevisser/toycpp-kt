@@ -1,0 +1,6 @@
+Per [intro.compliance.general], this document identifies all conditionally-supported constructs and whether they are supported. For semantics, see the list of implementation-defined behaviour.
+
+[lex.header]
+Can ', \, /*, or // appear in a header-name, and can " appear in the <> form of a header-name?
+
+Not supported. \ can appear here in the source file as part of a line splice, but it is conceptually removed by this point.

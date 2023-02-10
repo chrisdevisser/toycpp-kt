@@ -1,0 +1,8 @@
+This document lists explicit undefined behaviour in the standard. See also: https://wg21.link/p1705
+
+[lex.phases]
+    -the splice of two source lines creating a UCN, except in a raw string literal
+    -concatenation creating a UCN
+
+[lex.pptokens]
+    -' or " would be its own token because it doesn't match a (user-defined) character/string literal

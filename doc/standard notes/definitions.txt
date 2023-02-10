@@ -1,0 +1,55 @@
+For quick reference, all the terms in [intro.defs]:
+
+access
+arbitrary-positional stream
+argument
+block
+character
+character container type
+collating element
+component
+conditionally-supported
+constant subexpression
+deadlock
+default behavior
+diagnostic message
+direct non-list initialization
+dynamic type
+expression-equivalent
+finite state machine
+format specifier
+handler function
+ill-formed program
+implementation-defined behavior
+implementation-defined strict total order over pointers
+implementation limits
+iostream class templates
+locale-specific behavior
+matched
+modifier function
+move assignment
+move construction
+multibyte character
+NTCTS
+observer function
+parameter
+primary equivalence class
+program-defined specialization
+program-defined type
+projection
+referencable type
+regular expression
+replacement function
+repositional stream
+required behavior
+reserved function
+signature
+stable algorithm
+static type
+sub-expression
+traits class
+unblock
+undefined behavior
+unspecified behavior
+valid but unspecified state
+well-formed program

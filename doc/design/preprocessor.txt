@@ -1,0 +1,15 @@
+The preprocessor works on a stream of pptokens to produce a stream of preprocessed tokens (which get converted to C++ tokens afterward), as well as a list of macro definitions that were encountered along the way. Directives are removed and macros are expanded.
+
+The lexed source contains special start-of-line tokens to ease the fact that directives must start at the beginning of the line. In addition, pptokens carry whether they have leading whitespace, which aids in things like stringizing.
+
+When a directive is encountered, it is parsed up to the next start-of-line token. No tokens are produced for directives, but each macro definition is recorded by name. Other tokens are checked for macro expansions using the definitions available at the time. If a macro expansion is encountered, it is handled as a self-contained process that deals with the necessary painting. Replacement tokens are produced into the result and keep track of which macro definition they came from.
+
+Conditional directives require a basic level of expression evaluation. This encompasses integer and boolean constants, as well as operators on them. Because this is a subset of constant expressions, the tokens in the expression can be expanded and converted before being passed off to the regular constant expression evaluator. Unfortunately, this muddies the separation of preprocessing into its own step.
+
+Lexer Dependence
+
+Because concatenation produces tokens, there must be some form of raw lexing present in the preprocessor. To make this dependency as small as possible, the preprocessor takes a function `(string) -> TokenKind` and uses that to build the token.
+
+#line causes the following tokens to have a different source location, which is set while lexing. This is handled by lazily lexing and updating the current location when #line is encountered, again through a minimal dependency.
+
+The other option would be to do a pass that handles #line by creating a new stream of tokens with updated locations. At a glance, separating these sounds good. However, his pass would need to conceptually occur after a conditional inclusion pass. That pass would depend on macro replacement, but macro replacement depends on conditional inclusion.

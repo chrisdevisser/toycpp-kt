@@ -1,0 +1,5 @@
+Parsing generally happens the way we read the code as humans. When an unknown name appears, its declaration and/or type can be looked up. This is sometimes necessary in order to parse things such as `A * B;` to the right kind of AST node.
+
+As the parser goes along, it records declarations. These declarations are used to build a symbol table. Because declarations must precede use, full name resolution is done while parsing. This takes care of later declarations not complicating name resolution later. Later redeclarations or definitions update these entries in-place.
+
+In addition, types can be determined with the information available by that point in the program. For templates in particular, the type is required in order to know how to parse a nested name. Type information can be built up and consulted as needed.

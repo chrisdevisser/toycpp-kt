@@ -1,0 +1,15 @@
+PP Lexer vs. C++ Lexer
+
+There is a major split in lexing C++. During preprocessing, many C++ tokens such as keywords have no special meaning. Instead, there's a more basic set of "preprocessing-token"s, referred to as "pptokens". A notable example of where these differ is "ppnumber", which is an amalgamation of integer literals and floating-point literals. A valid ppnumber might not be a valid C++ token (e.g., 5..6).
+
+To handle this, the initial lexing produces pptokens, which are used for preprocessing as needed. Once preprocessing finishes, these tokens are converted to C++ tokens without re-lexing.
+
+Tokens
+
+Tokens store their source location, token kind, and lexeme.
+
+Because whitespace can be collapsed, tokens store whether they have leading whitespace rather than the compiler keeping track of exactly what whitespace that is. This is sufficient for inserting one space between tokens where needed. The choice of leading vs. trailing boils down to the lexer being able to easily keep track of this when forming the next token instead of reading ahead or adjusting the previously created token. This applies only to pptokens, not to C++ tokens.
+
+Alternative Tokens
+
+Alternative tokens and their counterparts are represented identically, but have a different lexeme. However, alternative tokens must keep their spelling in attributes. The way this is handled is to have the conversion from pptokens to C++ tokens keep track of whether the tokens are currently in an attribute and produce identifier tokens instead of operator tokens in this context. This requires keeping track of balancing inside the attribute to properly determine which ]] ends it. It runs the risk of poor recovery if the attribute is never ended, so it might need a special case in the future to reset this detection when encountering tokens that aren't allowed in an attribute.

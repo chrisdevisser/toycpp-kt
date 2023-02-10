@@ -1,0 +1,5 @@
+[lex.comment]
+    -a line comment contains a vertical tab or form feed and there is a non-whitespace character between it and the terminating newline (after splicing)
+
+[lex.name]
+    -a reserved identifier is used: __ anywhere, _Capital at start, _ at start in global namespace

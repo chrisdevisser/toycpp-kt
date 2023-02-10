@@ -1,0 +1,27 @@
+This document covers the design of the translation process itself, including details along the way.
+
+Translation
+
+Conceptually, the file is preprocessed top-down and directives are handled as they are encountered. In terms of the compiler design, that means some of the translation up to this point is lazy.
+
+The preprocessing phase is as follows:
+
+1. (Eager) The current source file is read in and stored as one string. This process involves ensuring that the characters are all ASCII. Diagnostics at this stage will not honour #line directives, and might not have a proper source location yet. The whole process is finished before moving on; any errors are fatal.
+2. (Lazy) Each character has its location attached. The location tracker used to generate these is later given to the preprocessor so that #line can affect the results. This necessitates laziness.
+3. (Lazy) Line splices are removed, joining the lines. Locations are unaffected. This process relies on lexing context that is later updated by the lexer.
+4. (Lazy) The characters of the source file are lexed into pptokens, whitespace tokens, and start-of-line tokens.
+5. (Lazy) Comments and whitespace are discarded. Start-of-line tokens are preserved to aid in detecting preprocessing directives. Tokens keep track of leading whitespace.
+6. (Lazy) Preprocessing directives are processed. Macro definitions are recorded. Macro replacement occurs. The result is a stream of pptokens with no more directives or unexpanded macros, where each token has information about the macro expansion that created it. In order for header files to work, the macro definitions are also returned from an invocation of the preprocessor.
+7. (Lazy) Character and string literals are converted to ASCII with characters not present (UCNs) converted to ?.
+8. (Lazy) Adjacent string literals are concatenated.
+9. (Eager) The pptokens are converted to C++ tokens. This involves parsing out integer literals from floating-point literals. Alternative tokens are given the same token kind as the raw forms, but are given an identifier token within an attribute. Keywords are also given an identifier token in attributes.
+
+From here, regular C++ parsing is performed. However, due to C++'s dependencies between parsing and name resolution, both happen at the same time in one pass.
+
+Encoding
+
+All work is done in ASCII. This is good enough to get a functional compiler up and running with minimal time spent on encoding. A breaking change to UTF-8 later is no trouble. As there are only a few parts of the compiler affected, changing them won't cause issues. C++23 requires Unicode support in these areas to be conforming, but C++20 comes first.
+
+Line Splices
+
+To separate responsibilities and more closely match the flow of the spec, line splices are lazily handled before lexing. However, this process relies on context from the lexer, specifically that line splices do not exist inside a raw string literal. To keep this flow, the line splice processing uses a mutable variable as a parameter that is later updated by the lexer. This clearly shows the backward link between the two while still remaining testable independently.

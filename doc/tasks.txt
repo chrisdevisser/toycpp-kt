@@ -1,0 +1,156 @@
+Phases of translation: [lex.phases]
+    1. Map characters to BSCS and add UCNs for non-BSCS characters.
+    2. Splice lines. Pretend files end with a newline.
+    3. Lex into pptokens and whitespace, replace comments with one space. Revert UCNs and line splices in raw strings.
+    4. Apply PP directives. Expand macros. Apply _Pragmas. Include headers.
+    5. Encode string literals.
+    6. Concatenate adjacent string literals.
+    7. Compile each TU: Convert to C++ tokens, parse, resolve, type check, perform semantic analysis.
+    8. Create instantiation units: Find definitions of instantiation, perform instantiations.
+    9. Link TUs: Resolve external entities, link library components, produce executable.
+
+-IB: document which output messages are diagnostics
+-IB: document "all locale-specific characteristics": https://docs.oracle.com/cd/E19205-01/819-5265/bjayv/index.html
+-IB: define what constitutes an interactive device
+-postsem: discover list of required instantiations per TU [lex.phases/8]
+-postsem: perform instantiations to produce an instantiation unit [lex.phases/8]
+-postsem: error if any instantiation fails [lex.phases/8]
+-postsem: mangle names
+-IB: document whether the sources for interface dependency module units and header units is required to be available
+-IB: document whether the source code for the definitions of required templates is required to be available
+-link: resolve external entities [lex.phases/9]
+-test: 0-9 are in-order consecutive in each execution character set [lex.charset/3]
+-opt: specific error if register appears [lex.key]
+-test: comments cannot be created by a macro [lex.operators], [cpp.concat]
+-opt: warn if #line filename does not exist [cpp.line]
+-opt: warn if #line number would cause rest of file to go out of bounds of #line file [cpp.line]
+
+Misc. Phases [lex.phases]
+    -opt: if supporting CRLF, map physical source file characters to basic source characters and update IB
+    -lex: convert lines separated by the source character sequence `\ \n` to a single line with different line numbers in source locations
+        -test: line splicing doesn't happen recursively
+        -test: line splices work mid-token
+    -postpp: concatenate adjacent string literals
+
+Basic Preprocessor Tokens (tied to more than one feature with no clear order) [lex.pptoken]
+    -ppnumber: .? \d (\d | \w | '\d | '\w | [eEpP][+-] | .)*
+    -punctuation: # { } [ ] ( ) ; : ... . ~ * & = < > && ,
+        -not included: ## ? :: .* -> ->* ! + - / % ^ | += -= *= /= %= ^= &= |= == != <= >= <=> || << >> <<= >>= ++ --
+            -all alternative tokens are not included
+    -misc: \
+    -ignore whitespace: space, tab, vertical tab, form feed
+    -opt: detect UB when seeing ' or " that doesn't match a token
+    -maximal munch
+
+Basic Preprocessor
+    -lex basic pptokens
+        -flag if it has leading whitespace
+        -inject start-of-line pseudotokens
+    -error when source ends in partial pp token
+    -convert pptokens to tokens
+        -error unless kw, id, lit, op, or punc
+        -produce identifiers instead of keyword or tokens like && inside of attributes
+
+Basic Parser
+    -create basic AST from token stream
+
+Comments [lex.comment]
+    -lex: // /* */
+    -lex: error if file ends inside of a comment
+    -postlex: discard comments
+    -test: comments do not work mid-token, creating two tokens instead
+    -test: block comments don't nest
+    -test: // ignored in block comment and /* */ ignored in line comment
+    -opt: keep track of comments
+    -opt: error if vertical tab or form feed appears without only whitespace until comment end
+
+UCNs [lex.charset]
+    -lex: `\u hex-quad` and `\U hex-octet` into UCN in identifier, pp-number
+    -pp: error if UCN in identifier is not in [tab:lex.name.allowed]
+    -pp: error if UCN beginning an identifier is in 0300-036F, 1DC0-1DFF, 20D0-20DD, or FE20-FE2F
+    -pp: error when UCN is not a code point (0-10FFFF) or is a surrogate code point (D800-DFFF)
+    -pp: error when UCN outside of char/string literal is a control character (0-1F, 7F-9F) or in BSCS
+    -opt: when supporting utf8 source, ensure UCN replacements function identically in header-names
+    -opt: detect UB if line splicing results in a UCN except in a raw string literal
+    -opt: detect UB if PP concatenation results in UCN
+    -parse: convert hex code point to appropriate encoding
+    -test: UCNs are not expanded in raw string literals
+    -test: http://open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3881.pdf
+
+Headers [lex.header]
+    -lex: #include
+    -pp: build header name
+    -pp: interpret header-name as path with / converted to system separator
+    -test: header ends in line comment
+    -test: ' " // /* */ in header-name, produce good errors
+
+Modules [lex.pptoken]
+    -pp: import soft kw
+    -pp: export kw
+    -pp: module soft kw
+    -pp: build header name after import directive
+
+Identifiers [lex.name]
+    -lex: identifier: [A-Za-z_]\w*
+    -opt: detect reserved identifiers: __ anywhere or _Capital at start or _ at start in global ns
+
+Integer Literals [lex.icon][basic.fundamental]
+    Basic
+        -postpp: parse \d+([uUlL] | ll | LL)
+        -parse: store suffix
+        -parse: store value
+    Octal
+        -parse: 0 prefix (0 is octal)
+    Hexadecimal
+        -parse: 0x and 0X prefixes
+    Binary
+        -parse: 0b and 0B prefixes
+    -sem: error if value is out of range for every allowable type
+    -type: new types: int, long, long long, unsigned, unsigned long, unsigned long long
+    -type: http://eel.is/c++draft/tab:lex.icon.type
+
+Digit separators [lex.icon]
+    -parse and ignore ' in the middle of integer literals (after full prefix, not at end or in suffix)
+
+Character Literals [lex.ccon][basic.fundamental]
+    -lex: char-lit
+    -type: new type: char
+
+String Literals
+    -lex: string-lit
+    -type: const char[N]
+
+UDLs
+    -lex: UD char-lit
+    -lex: UD string-lit
+
+Raw String Literals
+    -lex: R"delim(...)delim"
+        -error if R" found and token does not match a raw string literal
+
+char8_t [lex.ccon][lex.string]
+    -lex: allow u8 prefix on char/string/UDchar/UDstring literals
+    -type: new built-in type: char8_t
+
+char16_t [lex.ccon][lex.string]
+    -lex: allow u prefix on char/string/UDchar/UDstring literals
+    -type: new built-in type: char16_t
+
+char32_t [lex.ccon][lex.string]
+    -lex: allow U prefix on char/string/UDchar/UDstring literals
+    -type: new built-in type: char32_t
+
+Wide Characters and Strings [lex.ccon][lex.string]
+    -lex: allow L prefix on char/string/UDchar/UDstring literals
+    -type: new built-in type: wchar_t
+
+Alternative Tokens (Digraphs) [lex.digraph]
+    -lex: <% %> -> {}, <: :> -> [], %: %:%: -> # ##, and bitor or xor compl bitand and_eq or_eq xor_eq not not_eq
+    -lex: <:: is < :: (not <: :) unless next character is : or > [lex.pptoken]
+    -each alternative token acts exactly the same way apart from the spelling
+        -test: & ## bitand produces &bitand, not && or and
+        -test: bitand ## bitand produces bitandbitand, not && or and
+        -test: stringizing any form of bitand produces "bitand", not "&"
+
+__has_include
+    -pp: build header name inside parens

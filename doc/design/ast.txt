@@ -1,0 +1,7 @@
+Literals
+
+Literals have some leeway with how they're represented. For example, hexadecimal and binary literals have the same value as decimal literals, but a difference in spelling. The base is not preserved in the AST node.
+
+Names
+
+Not all names are equal. Qualified names, member accesses, and template specializations are deliberately kept as simple as possible to avoid a big headache when using the final AST.

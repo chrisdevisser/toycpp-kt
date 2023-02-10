@@ -1,0 +1,11 @@
+Target Specifics
+
+The compiler is hardcoded to x86_64 as a start. This is because supporting a range of platforms is not the focus of the project. For types, that means that things such as the size of built-in types can be hardcoded for this architecture and made more general later on.
+
+Decltype
+
+Like other code, decltype is resolvable with the information available up to that point. The expression is type-checked eagerly, which might need to evaluate a constant expression inside (e.g., `decltype(foo<bar()>())`.
+
+Auto
+
+auto creates a declaration whose type must be filled in later. Since the name is in scope, it must be detectable in some way that the type has not yet been filled. For functions, an auto return type can be present in a declaration that does not come with a definition, which prevents this process from happening in one fell swoop.

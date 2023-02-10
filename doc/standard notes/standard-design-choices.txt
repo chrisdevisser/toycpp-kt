@@ -1,0 +1,44 @@
+TODO: __FILE__ + Unicode
+
+[lex.phases] [cpp.predefined]
+Should __LINE__ be affected by line splicing?
+
+No. While it would be easier to implement, it is not useful at all for the use cases of __LINE__ (e.g., assertions).
+Reference: https://stackoverflow.com/questions/65101660/how-does-a-backslash-newline-combo-affect-the-value-of-the-c-preprocessors-li
+
+[lex.phases]
+Are non-BSCS characters in a raw string literal represented as their corresponding UCN?
+
+```
+An implementation may use any internal encoding, so long as an actual extended character encountered in the source file, and the same extended character expressed in the source file as a universal-character-name (e.g., using the \uXXXX notation), are handled equivalently except where this replacement is reverted ([lex.pptoken]) in a raw string literal.
+```
+
+The replacement referred to in the last sentence seems ambiguous as to whether it means that the original X -> \uxxxx replacement is reverted if using an internal encoding that can represent X or whether it means that the \uxxxx -> X replacement done if the implementation so chooses is reverted. None of the big three compilers treat a Unicode character in a raw string literal as a UCN, so it presumably has the first meaning: If X can be represented in the internal encoding, this character represents X, not \uxxxx.
+
+Currently, Unicode is unsupported in this compiler, so this situation results in an error upon seeing X as a source character.
+
+TODO: Unicode
+
+[lex.phases]
+Is it valid for a file to end in a backslash?
+
+```
+A source file that is not empty and that does not end in a new-line character, or that ends in a new-line character immediately preceded by a backslash character before any such splicing takes place, shall be processed as if an additional new-line character were appended to the file.
+```
+
+My interpretation is that this is invalid because the spirit of this text is to always have a trailing blank line in the file. If a line splice were to occur because of this, there would be no such line. This behaviour matches GCC and Clang, but not MSVC.
+
+[lex.phases]
+Does a comment *need* to be replaced by a single space?
+
+Not as far as I can tell. While `i/**/nt x;` is ill-formed, this can be preserved by lexing the comment as its own token. The comment can be kept for tools or discarded. It is impossible to make a comment inside of a header-name pptoken, so that case doesn't need to be considered.
+
+[lex.phases]
+Should non-newline whitespace be retained or replaced by one space character?
+
+Retaining whitespace seems the most natural. However, condensing it can sometimes allow for whitespace to be discarded completely. There are two cases where whitespace is significant for later use. If parsing a header name, the name can be taken directly from the source, even in the "" version. If processing stringification, passing multiple tokens always condenses the whitespace between them. Keeping track of whitespace here is done with a flag in the token for whether it has leading space. Another option is examining the original source text, but this requires handling line splices again. Whitespace interfering with splicing is handled the same way as whitespace between tokens. Beyond the preprocessor, whitespace can be discarded unless tools require it.
+
+[lex.phases]
+Should context-sensitive PP lexing be handled in the lexer to produce "better" tokens or should handling this come later?
+
+The only context-sensitive lex I know of is that a header-name (< pptokens > or " pptoken ") is formed only in some contexts. Currently, I'm leaning toward skipping out on this token entirely. The lexer lexes the individual tokens. Once lexing is done, the preprocessor can go through building macro definitions. At this point, it has the means to parse these individual tokens in context and act on the header name while leaving them alone in other contexts. Rather than having a special case to create the token, the grammar can be extended and this can be handled by normal parsing.
