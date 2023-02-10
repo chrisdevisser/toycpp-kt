@@ -10,9 +10,7 @@ class DiagnosticReporter(val trace: Boolean) : DiagnosticSink {
     override fun handle(diag: Diagnostic, location: SourceLocation?) {
         val locationPrefix =
             if (location != null) {
-                with (location) {
-                    "<$filename> $line:$col "
-                }
+                "$location "
             } else {
                 ""
             }

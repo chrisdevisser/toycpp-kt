@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import toycpp.location.SourceChar
 import toycpp.location.SourceLocation
 
@@ -16,3 +17,9 @@ fun String.withDummyLocations(): Sequence<SourceChar> =
 
 fun assertSequenceEquals(expected: Sequence<Any>, actual: Sequence<Any>) =
     assertIterableEquals(expected.asIterable(), actual.asIterable())
+
+fun<T> assertIterableMatches(iterable: Iterable<T>, pred: (T) -> Boolean) {
+    for (x in iterable) {
+        assertTrue(pred(x))
+    }
+}

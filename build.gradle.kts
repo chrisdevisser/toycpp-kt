@@ -28,7 +28,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions.freeCompilerArgs += listOf(
-        "-Xopt-in=kotlin.contracts.ExperimentalContracts",
-        "-Xopt-in=kotlin.ExperimentalUnsignedTypes"
+        "-opt-in=kotlin.contracts.ExperimentalContracts",
+        "-opt-in=kotlin.ExperimentalUnsignedTypes"
     )
 }

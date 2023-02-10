@@ -37,23 +37,23 @@ private enum class DepthVisitState {
  */
 fun<Node> depthCover(start: Node, getNeighbors: (Node) -> List<Node>): DepthCoverResult<Node> {
     // Implementation: Introduction to Algorithms (CLRS), 22.11
-    val visited = mutableMapOf<Node, DepthVisitState>()
+    val visitState = mutableMapOf<Node, DepthVisitState>()
     val cycleNodes = mutableListOf<Node>()
     val result = mutableListOf<Node>()
 
     fun process(node: Node) {
-        visited[node] = InProgress
+        visitState[node] = InProgress
         result += node
 
         for (neighbor in getNeighbors(node)) {
-            when (visited[neighbor]) {
+            when (visitState[neighbor]) {
                 null -> process(neighbor)
                 InProgress -> cycleNodes += neighbor
                 Finished -> {}
             }
         }
 
-        visited[node] = Finished
+        visitState[node] = Finished
     }
 
     process(start)

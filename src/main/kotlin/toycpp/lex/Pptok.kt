@@ -84,4 +84,9 @@ enum class Pptok(value: Int) {
 
     // Pseudotokens that aren't part of the language
     StartOfLine(counter++), // Makes it easier to parse preprocessing directives, which must begin the line
+    SpecialCaseDigraphLex(counter++), // Represents %:%, which is two tokens: %: %
+    SpecialCaseTemplateLex(counter++), // Represents <::, which is later fixed into < ::
+    RawStringStart(counter++), // Raw string literals are parsed manually by the lexer because of matching delimiters
+    InvalidToken(counter++), // Helps to consolidate errors
+    InvalidUnterminatedLiteral(counter++), // Helps to give a good error for an unterminated character or string literal
 }

@@ -1,4 +1,4 @@
-package toycpp.extensions
+package toycpp.sequences
 
 fun<T> Sequence<T>.peek1(): Peek1Sequence<T> =
     Peek1Sequence(this)

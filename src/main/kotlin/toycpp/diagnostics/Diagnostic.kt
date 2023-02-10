@@ -1,6 +1,7 @@
 package toycpp.diagnostics
 
 import toycpp.diagnostics.DiagnosticSeverity.Error
+import toycpp.encoding.escapeAsciiStringForHumans
 import toycpp.extensions.getCurrentDirectory
 import java.nio.file.Path
 
@@ -54,4 +55,9 @@ class FileReadError(val path: Path, val cause: String) : Diagnostic(Error) {
 class InvalidSourceEncoding(val expectedEncoding: String, val badByteValue: UByte) : Diagnostic(Error) {
     override fun formatMessage(): String =
         "Expected source file to be $expectedEncoding, but got invalid character with bad byte value of $badByteValue (${badByteValue.toString(radix = 16)})."
+}
+
+class InvalidToken(val lexeme: String) : Diagnostic(Error) {
+    override fun formatMessage(): String =
+        "Lexing a token couldn't finish after matching '${escapeAsciiStringForHumans(lexeme)}'."
 }

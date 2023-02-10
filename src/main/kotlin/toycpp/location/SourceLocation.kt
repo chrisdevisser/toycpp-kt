@@ -15,6 +15,9 @@ data class SourceLocation(
     val line: Int,
     val col: Int
 ) {
+    override fun toString() =
+        "<$filename> $line:$col"
+
     companion object {
         /**
          * Compares two source locations while ignoring the filename. The line number is prioritized over the column number.

@@ -26,7 +26,7 @@ fun ensureBscsAscii(filename: String, bytes: Iterable<UByte>): String? {
             ('0'..'9').joinToString("") +
             "_{}[]#()<>%:;.?*+-/^&|~!=,\\\"'"
 
-    assert(bscsChars.count() == 96) { "BUG: The BSCS is specified as 96 characters." }
+    assert(bscsChars.count() == 96) { "The BSCS is specified as 96 characters but this is ${bscsChars.count()}." }
 
     return bytes.map { b ->
         if (b.toChar() in bscsChars) {

@@ -3,39 +3,39 @@ package toycpp.parser
 import toycpp.debug.prettyFormat
 import toycpp.diagnostics.trace
 
-sealed class ParseResult<out T, In>(
-    val remainingInput: Sequence<In>,
-    val inputsConsumed: Int
-) {
-    class Success<out T, In>(val result: T, remainingInput: Sequence<In>, inputsConsumed: Int)
-        : ParseResult<T, In>(remainingInput, inputsConsumed)
-
-    class Failure<out T, In>(val result: T, remainingInput: Sequence<In>, inputsConsumed: Int)
-        : ParseResult<T, In>(remainingInput, inputsConsumed)
-
-    fun asBase() = this // For generic functions that require the type to match exactly
-
-    /**
-     * Picks the appropriate mapping function and returns the result of calling it with this parse result.
-     */
-    fun<R> map(success: (Success<T, In>) -> R, failure: (Failure<T, In>) -> R): R =
-        when (this) {
-            is Success -> success(this)
-            is Failure -> failure(this)
-        }
-}
-
-class Parser<out T, In>(
+abstract class Parser<out T, In>(
     val name: String,
-    val parse: (Sequence<In>) -> ParseResult<T, In>
 ) {
     operator fun invoke(input: Sequence<In>): ParseResult<T, In> {
         val result = parse(input)
 
         val traceMessage = "Parse of $name: " +
-                result.map(success = {"Success! (${prettyFormat(it.result)})"}, failure = {"Failure!"})
+                result.mapEither(success = {"Success! (${prettyFormat(result)})"}, failure = {"Failure!"})
         trace(traceMessage)
 
         return result
     }
+
+    abstract fun parse(input: Sequence<In>): ParseResult<T, In>
+    abstract infix fun named(newName: String): Parser<T, In>
 }
+
+fun<T, R, In> Parser<T, In>.mapResult(transformResult: (ParseResult<T, In>) -> ParseResult<R, In>): Parser<R, In> =
+    AdhocParser(name) { input ->
+        transformResult(this(input))
+    }
+
+fun<T, R, In> Parser<T, In>.bindSuccess(transformValue: (T) -> Parser<R, In>): Parser<R, In> =
+    mapResult { it.bindSuccess(transformValue) }
+
+fun<Alt, T : Alt, In> Parser<T, In>.orElseSuccess(produceValue: () -> Alt): Parser<Alt, In> =
+    mapResult { it.orElseSuccess(produceValue) }
+
+fun<Alt, T : Alt, In> Parser<T, In>.mapFailure(produceResult: () -> ParseResult<Alt, In>): Parser<Alt, In> =
+    mapResult { it.mapFailure(produceResult) }
+
+fun<Alt, T : Alt, In> Parser<T, In>.bindFailure(produceParser: () -> Parser<Alt, In>): Parser<Alt, In> =
+    mapResult { it.bindFailure(produceParser) }
+
+infix fun<T, R, In> Parser<T, In>.withValue(transformValue: (T) -> R): Parser<R, In> =
+    mapResult { it.mapSuccess(transformValue) }

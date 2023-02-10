@@ -5,6 +5,9 @@ import toycpp.encoding.ensureBscsAscii
 import toycpp.filesystem.Filesystem
 import toycpp.lex.LexContext
 import toycpp.lex.LexContextHolder
+import toycpp.lex.createCppDfa
+import toycpp.lex.ppinterface.PpContext
+import toycpp.lex.ppinterface.PpContextHolder
 import toycpp.lex.withLinesSpliced
 import toycpp.location.withLocations
 import java.nio.file.Path
@@ -54,6 +57,8 @@ fun compileToBinary(sourcePath: Path, filesystem: Filesystem) {
     // /3: Lexing is done to create pptokens.
     //
     // Whitespace is kept only as a token flag indicating leading whitespace.
+    val ppContext = PpContextHolder(PpContext.NothingSpecial)
+    val dfa = createCppDfa()
 //    val lexer = Lexer(sourceWithoutLineSplices, locationTracker)
 //    val pptokens = lexer.lazyLexPptokens().removeComments()
 

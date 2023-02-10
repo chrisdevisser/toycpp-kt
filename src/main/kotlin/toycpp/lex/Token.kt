@@ -6,6 +6,7 @@ data class Token<Kind>(
     val kind: Kind,
     val lexeme: String,
     val startLocation: SourceLocation,
+    val endLocation: SourceLocation,
     val hasLeadingWhitespace: Boolean
 )
 
