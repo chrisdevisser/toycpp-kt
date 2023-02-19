@@ -4,13 +4,19 @@ import toycpp.extensions.split1
 import toycpp.parser.ParseResult.Failure
 import toycpp.parser.ParseResult.Success
 
+fun<In> single(): Parser<In, In> =
+    AdhocParser("single") { input ->
+        input.split1()?.let { (first, rest) -> Success(first, rest) }
+            ?: Failure(emptySequence())
+    }
+
 private fun<In, InComp> buildAnyImpl(proj: (In) -> InComp, comp: (InComp) -> Boolean): Parser<In, In> {
     fun parse(input: Sequence<In>): ParseResult<In, In> {
-        val (first, rest) = input.split1() ?: return Failure(input, emptyList())
+        val (first, rest) = input.split1() ?: return Failure(input)
         return if (comp(proj(first))) {
-            Success(first, rest, listOf(first))
+            Success(first, rest)
         } else {
-            Failure(rest, listOf(first))
+            Failure(rest)
         }
     }
     return AdhocParser("", ::parse)
@@ -44,18 +50,18 @@ fun<In, InComp> buildSeq(nameSeparator: String = ",", proj: (In) -> InComp): (It
             var remainingInput = input
 
             for (elem in seq) {
-                val (first, rest) = remainingInput.split1() ?: return Failure(input, inputConsumed)
+                val (first, rest) = remainingInput.split1() ?: return Failure(input)
                 inputConsumed += first
                 remainingInput = rest
 
                 if (proj(first) != elem) {
-                    return Failure(rest, inputConsumed)
+                    return Failure(rest)
                 }
 
                 value += first
             }
 
-            return Success(value, remainingInput, inputConsumed)
+            return Success(value, remainingInput)
         }
         AdhocParser("seq(${seq.joinToString(nameSeparator)})", ::parse)
     }

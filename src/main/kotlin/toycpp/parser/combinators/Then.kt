@@ -1,11 +1,11 @@
 package toycpp.parser.combinators
 
 import toycpp.parser.Parser
-import toycpp.parser.bindSuccess
-import toycpp.parser.withValue
+import toycpp.parser.bindValue
+import toycpp.parser.mapValue
 
 infix fun<L, R, In> Parser<L, In>.then(next: Parser<R, In>): Parser<Pair<L, R>, In> =
-    bindSuccess { value -> next withValue { nextValue -> Pair(value, nextValue) } }
+    bindValue { value -> next mapValue { nextValue -> Pair(value, nextValue) } }
 
 infix fun<T, In> Parser<List<T>, In>.thenL(next: Parser<List<T>, In>): Parser<List<T>, In> =
-    bindSuccess { values -> next withValue { nextValues -> values + nextValues } }
+    bindValue { values -> next mapValue { nextValues -> values + nextValues } }

@@ -8,12 +8,12 @@ class SeqParser<out T, In>(rawParsers: List<Parser<T, In>>, name: String? = null
 ) {
     val parsers: List<Parser<T, In>> = simplifyParsers(rawParsers)
 
-    override fun parse(input: Sequence<In>): ParseResult<List<T>, In> =
+    override fun doParse(input: Sequence<In>): ParseResult<List<T>, In> =
         // Start with success, any failed parse cascades through the rest.
         // Each successful parse adds an element to the result list.
-        parsers.fold(Success<List<T>, In>(emptyList(), input, emptyList()).asBase()) { resultSoFar, nextParser ->
-            resultSoFar.bindSuccess { valueSoFar ->
-                nextParser withValue { valueSoFar + it }
+        parsers.fold(Success<List<T>, In>(emptyList(), input).asBase()) { resultSoFar, nextParser ->
+            resultSoFar.bindValue { valueSoFar ->
+                nextParser mapValue { valueSoFar + it }
             }
         }
 

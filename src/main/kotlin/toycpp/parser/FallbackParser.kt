@@ -10,10 +10,10 @@ class FallbackParser<out T, In>(rawOptions: List<Parser<T, In>>, name: String? =
 
     constructor(vararg options: Parser<T, In>) : this(options.toList())
 
-    override fun parse(input: Sequence<In>): ParseResult<T, In> =
+    override fun doParse(input: Sequence<In>): ParseResult<T, In> =
         // Start with failure, any successful parse cascades through the rest and determines the value.
-        options.fold(Failure<T, In>(input, emptyList()).asBase()) { resultSoFar, nextParser ->
-            resultSoFar.bindFailure {nextParser}
+        options.fold(Failure<T, In>(input).asBase()) { resultSoFar, nextParser ->
+            resultSoFar.mapFailure { nextParser.parse(input) }
         }
 
     override fun named(newName: String): Parser<T, In> = FallbackParser(options, newName)

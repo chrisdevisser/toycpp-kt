@@ -22,18 +22,16 @@ private fun any(options: Iterable<Char>) = any(options.joinToString(""))
 private fun anyExcept(exclusion: Char) = anyExceptImpl(listOf(exclusion))
 fun anyExcept(vararg exclusions: Char) = anyExceptImpl(exclusions.asIterable())
 
-fun<T> assertSuccessParse(result: ParseResult<T, Char>, value: T, remainingInput: String, inputConsumed: String) {
+fun<T> assertSuccessParse(result: ParseResult<T, Char>, value: T, remainingInput: String) {
     assertTrue(result is Success)
     result as Success
 
     assertEquals(value, result.value)
-    assertSequenceEquals(remainingInput.asSequence(), result.remainingInput)
-    assertIterableEquals(inputConsumed.asIterable(), result.inputConsumed)
+    assertEquals(remainingInput, result.remainingInput.joinToString(""))
 }
 
-fun assertFailureParse(result: ParseResult<*, Char>, remainingInput: String, inputConsumed: String) {
+fun assertFailureParse(result: ParseResult<*, Char>, remainingInput: String) {
     assertTrue(result is Failure)
 
-    assertSequenceEquals(remainingInput.asSequence(), result.remainingInput)
-    assertIterableEquals(inputConsumed.asIterable(), result.inputConsumed)
+    assertEquals(remainingInput, result.remainingInput.joinToString(""))
 }

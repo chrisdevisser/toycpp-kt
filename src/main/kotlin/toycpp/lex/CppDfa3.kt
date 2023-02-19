@@ -13,12 +13,12 @@ private val anyImpl = buildAny<SourceChar, Char>("") { it.c }
 private val anyExceptImpl = buildAnyExcept<SourceChar, Char>("") { it.c }
 private val seqImpl = buildSeq<SourceChar, Char>("") { it.c }
 
-private fun single(c: Char) = anyImpl(listOf(c)) withValue { listOf(it) }
+private fun single(c: Char) = anyImpl(listOf(c)) mapValue { listOf(it) }
 private operator fun Char.unaryPlus() = single(this)
 private fun any(options: Iterable<Char>) = any(options.joinToString(""))
-private fun any(options: String) = anyImpl(options.asIterable()) withValue { listOf(it) }
-private fun anyExcept(exclusion: Char) = anyExceptImpl(listOf(exclusion)) withValue { listOf(it) }
-private fun anyExcept(exclusions: String) = anyExceptImpl(exclusions.asIterable()) withValue { listOf(it) }
+private fun any(options: String) = anyImpl(options.asIterable()) mapValue { listOf(it) }
+private fun anyExcept(exclusion: Char) = anyExceptImpl(listOf(exclusion)) mapValue { listOf(it) }
+private fun anyExcept(exclusions: String) = anyExceptImpl(exclusions.asIterable()) mapValue { listOf(it) }
 
 private fun seq(s: String) = seqImpl(s.toList())
 private operator fun String.unaryPlus() = seq(this)
@@ -96,92 +96,92 @@ fun createCppLexer(ppContext: PpContextHolder, lexContext: LexContextHolder): Cp
     // Any common prefix in tokens needs the longer one to come first because of matching top-down.
     val ppOpOrPunc =
         // Digraphs: [lex.digraph]
-        (+"<%" withValue genToken(Pptok.LBrace)) or
-        (+"%>" withValue genToken(Pptok.RBrace)) or
-        (+"<::" withValue genToken(Pptok.SpecialCaseTemplateLex)) or
-        (+"<:" withValue genToken(Pptok.LSquareBracket)) or
-        (+":>" withValue genToken(Pptok.RSquareBracket)) or
-        (+"%:%:" withValue genToken(Pptok.Concat)) or
-        (+"%:" withValue genToken(Pptok.Pound)) or
-        (+"bitor" withValue genToken(Pptok.BitOr)) or
-        (+"compl" withValue genToken(Pptok.Compl)) or
-        (+"bitand" withValue genToken(Pptok.BitAnd)) or
-        (+"and_eq" withValue genToken(Pptok.AndEquals)) or
-        (+"or_eq" withValue genToken(Pptok.OrEquals)) or
-        (+"xor_eq" withValue genToken(Pptok.XorEquals)) or
-        (+"not_eq" withValue genToken(Pptok.NotEqualTo))
-        (+"not" withValue genToken(Pptok.Not)) or
-        (+"and" withValue genToken(Pptok.And)) or
-        (+"or" withValue genToken(Pptok.Or)) or
-        (+"xor" withValue genToken(Pptok.Xor))
+        (+"<%" mapValue genToken(Pptok.LBrace)) or
+        (+"%>" mapValue genToken(Pptok.RBrace)) or
+        (+"<::" mapValue genToken(Pptok.SpecialCaseTemplateLex)) or
+        (+"<:" mapValue genToken(Pptok.LSquareBracket)) or
+        (+":>" mapValue genToken(Pptok.RSquareBracket)) or
+        (+"%:%:" mapValue genToken(Pptok.Concat)) or
+        (+"%:" mapValue genToken(Pptok.Pound)) or
+        (+"bitor" mapValue genToken(Pptok.BitOr)) or
+        (+"compl" mapValue genToken(Pptok.Compl)) or
+        (+"bitand" mapValue genToken(Pptok.BitAnd)) or
+        (+"and_eq" mapValue genToken(Pptok.AndEquals)) or
+        (+"or_eq" mapValue genToken(Pptok.OrEquals)) or
+        (+"xor_eq" mapValue genToken(Pptok.XorEquals)) or
+        (+"not_eq" mapValue genToken(Pptok.NotEqualTo))
+        (+"not" mapValue genToken(Pptok.Not)) or
+        (+"and" mapValue genToken(Pptok.And)) or
+        (+"or" mapValue genToken(Pptok.Or)) or
+        (+"xor" mapValue genToken(Pptok.Xor))
 
         // The normal stuff
-        (+"##" withValue genToken(Pptok.Concat)) or
-        (+"" withValue genToken(Pptok.Pound)) or
-        (+"{" withValue genToken(Pptok.LBrace)) or
-        (+"}" withValue genToken(Pptok.RBrace)) or
-        (+"[" withValue genToken(Pptok.LSquareBracket)) or
-        (+"]" withValue genToken(Pptok.RSquareBracket)) or
-        (+"(" withValue genToken(Pptok.OpenParen)) or
-        (+")" withValue genToken(Pptok.CloseParen)) or
-        (+";" withValue genToken(Pptok.Semicolon)) or
-        (+"::" withValue genToken(Pptok.ColonColon)) or
-        (+":" withValue genToken(Pptok.Colon)) or
-        (+"..." withValue genToken(Pptok.Ellipsis)) or
-        (+"?" withValue genToken(Pptok.Cond)) or
-        (+".*" withValue genToken(Pptok.DotStar)) or
-        (+"." withValue genToken(Pptok.Dot)) or
-        (+"->*" withValue genToken(Pptok.ArrowStar)) or
-        (+"->" withValue genToken(Pptok.Arrow)) or
-        (+"+=" withValue genToken(Pptok.PlusEquals)) or
-        (+"-=" withValue genToken(Pptok.MinusEquals)) or
-        (+"*=" withValue genToken(Pptok.TimesEquals)) or
-        (+"/=" withValue genToken(Pptok.OverEquals)) or
-        (+"%=" withValue genToken(Pptok.ModEquals)) or
-        (+"^=" withValue genToken(Pptok.XorEquals)) or
-        (+"&=" withValue genToken(Pptok.AndEquals)) or
-        (+"|=" withValue genToken(Pptok.OrEquals)) or
-        (+"==" withValue genToken(Pptok.EqualTo)) or
-        (+"!=" withValue genToken(Pptok.NotEqualTo)) or
-        (+"~" withValue genToken(Pptok.Compl)) or
-        (+"!" withValue genToken(Pptok.Not)) or
-        (+"*" withValue genToken(Pptok.Times)) or
-        (+"/" withValue genToken(Pptok.Over)) or
-        (+"%" withValue genToken(Pptok.Mod)) or
-        (+"^" withValue genToken(Pptok.Xor)) or
-        (+"=" withValue genToken(Pptok.Assign)) or
-        (+"<=>" withValue genToken(Pptok.Spaceship)) or
-        (+"<=" withValue genToken(Pptok.LessThanOrEqualTo)) or
-        (+">=" withValue genToken(Pptok.GreaterThanOrEqualTo)) or
-        (+"&&" withValue genToken(Pptok.And)) or
-        (+"||" withValue genToken(Pptok.Or)) or
-        (+"&" withValue genToken(Pptok.BitAnd)) or
-        (+"|" withValue genToken(Pptok.BitOr)) or
-        (+"<<" withValue genToken(Pptok.LeftShift)) or
-        (+">>" withValue genToken(Pptok.RightShift)) or
-        (+"<<=" withValue genToken(Pptok.LeftShiftEquals)) or
-        (+">==" withValue genToken(Pptok.RightShiftEquals)) or
-        (+"++" withValue genToken(Pptok.PlusPlus)) or
-        (+"--" withValue genToken(Pptok.MinusMinus)) or
-        (+"+" withValue genToken(Pptok.Plus)) or
-        (+"-" withValue genToken(Pptok.Minus)) or
-        (+"<" withValue genToken(Pptok.LessThan)) or
-        (+">" withValue genToken(Pptok.GreaterThan)) or
-        (+"," withValue genToken(Pptok.Comma))
+        (+"##" mapValue genToken(Pptok.Concat)) or
+        (+"" mapValue genToken(Pptok.Pound)) or
+        (+"{" mapValue genToken(Pptok.LBrace)) or
+        (+"}" mapValue genToken(Pptok.RBrace)) or
+        (+"[" mapValue genToken(Pptok.LSquareBracket)) or
+        (+"]" mapValue genToken(Pptok.RSquareBracket)) or
+        (+"(" mapValue genToken(Pptok.OpenParen)) or
+        (+")" mapValue genToken(Pptok.CloseParen)) or
+        (+";" mapValue genToken(Pptok.Semicolon)) or
+        (+"::" mapValue genToken(Pptok.ColonColon)) or
+        (+":" mapValue genToken(Pptok.Colon)) or
+        (+"..." mapValue genToken(Pptok.Ellipsis)) or
+        (+"?" mapValue genToken(Pptok.Cond)) or
+        (+".*" mapValue genToken(Pptok.DotStar)) or
+        (+"." mapValue genToken(Pptok.Dot)) or
+        (+"->*" mapValue genToken(Pptok.ArrowStar)) or
+        (+"->" mapValue genToken(Pptok.Arrow)) or
+        (+"+=" mapValue genToken(Pptok.PlusEquals)) or
+        (+"-=" mapValue genToken(Pptok.MinusEquals)) or
+        (+"*=" mapValue genToken(Pptok.TimesEquals)) or
+        (+"/=" mapValue genToken(Pptok.OverEquals)) or
+        (+"%=" mapValue genToken(Pptok.ModEquals)) or
+        (+"^=" mapValue genToken(Pptok.XorEquals)) or
+        (+"&=" mapValue genToken(Pptok.AndEquals)) or
+        (+"|=" mapValue genToken(Pptok.OrEquals)) or
+        (+"==" mapValue genToken(Pptok.EqualTo)) or
+        (+"!=" mapValue genToken(Pptok.NotEqualTo)) or
+        (+"~" mapValue genToken(Pptok.Compl)) or
+        (+"!" mapValue genToken(Pptok.Not)) or
+        (+"*" mapValue genToken(Pptok.Times)) or
+        (+"/" mapValue genToken(Pptok.Over)) or
+        (+"%" mapValue genToken(Pptok.Mod)) or
+        (+"^" mapValue genToken(Pptok.Xor)) or
+        (+"=" mapValue genToken(Pptok.Assign)) or
+        (+"<=>" mapValue genToken(Pptok.Spaceship)) or
+        (+"<=" mapValue genToken(Pptok.LessThanOrEqualTo)) or
+        (+">=" mapValue genToken(Pptok.GreaterThanOrEqualTo)) or
+        (+"&&" mapValue genToken(Pptok.And)) or
+        (+"||" mapValue genToken(Pptok.Or)) or
+        (+"&" mapValue genToken(Pptok.BitAnd)) or
+        (+"|" mapValue genToken(Pptok.BitOr)) or
+        (+"<<" mapValue genToken(Pptok.LeftShift)) or
+        (+">>" mapValue genToken(Pptok.RightShift)) or
+        (+"<<=" mapValue genToken(Pptok.LeftShiftEquals)) or
+        (+">==" mapValue genToken(Pptok.RightShiftEquals)) or
+        (+"++" mapValue genToken(Pptok.PlusPlus)) or
+        (+"--" mapValue genToken(Pptok.MinusMinus)) or
+        (+"+" mapValue genToken(Pptok.Plus)) or
+        (+"-" mapValue genToken(Pptok.Minus)) or
+        (+"<" mapValue genToken(Pptok.LessThan)) or
+        (+">" mapValue genToken(Pptok.GreaterThan)) or
+        (+"," mapValue genToken(Pptok.Comma))
 
 
     // Anything not covered except ` @ $, which aren't in the BSCS.
     // ' and " are UB as tokens on their own per [lex.pptoken]/2
-    val leftoverPunctuation = +"\\" withValue genToken(Pptok.OtherCharacter)
+    val leftoverPunctuation = +"\\" mapValue genToken(Pptok.OtherCharacter)
 
     return zeroOrMore(
         ppOpOrPunc or // Before identifier because of alternative tokens
-        (identifier withValue genToken(Pptok.Identifier)) or
-        (ppnum withValue genToken(Pptok.Ppnum)) or
-        (charUdl withValue genToken(Pptok.CharUdl)) or // Before charLit because it adds to the end of one
-        (charLit withValue genToken(Pptok.CharLit)) or
-        (stringUdl withValue genToken(Pptok.StringUdl)) or // Before stringLit because it adds to the end of one
-        (stringLit withValue genToken(Pptok.StringLit)) or
+        (identifier mapValue genToken(Pptok.Identifier)) or
+        (ppnum mapValue genToken(Pptok.Ppnum)) or
+        (charUdl mapValue genToken(Pptok.CharUdl)) or // Before charLit because it adds to the end of one
+        (charLit mapValue genToken(Pptok.CharLit)) or
+        (stringUdl mapValue genToken(Pptok.StringUdl)) or // Before stringLit because it adds to the end of one
+        (stringLit mapValue genToken(Pptok.StringLit)) or
         leftoverPunctuation // After identifier because of UCNs
     )
 

@@ -1,16 +1,16 @@
 package toycpp.parser.combinators
 
 import toycpp.parser.Parser
-import toycpp.parser.bindSuccess
+import toycpp.parser.bindValue
 import toycpp.parser.orElseSuccess
-import toycpp.parser.withValue
+import toycpp.parser.mapValue
 
 fun<T, In> zeroOrMore(parser: Parser<T, In>): Parser<List<T>, In> {
-    val first = parser.withValue { listOf(it) }
-    return first.bindSuccess { firstValue -> zeroOrMore(parser) withValue { rest -> firstValue + rest } }
+    val first = parser.mapValue { listOf(it) }
+    return first.bindValue { firstValue -> zeroOrMore(parser) mapValue { rest -> firstValue + rest } }
         .orElseSuccess { emptyList() }
         .named("0+ ${parser.name}")
 }
 
 fun<T, In> zeroOrMoreL(parser: Parser<List<T>, In>): Parser<List<T>, In> =
-    zeroOrMore(parser) withValue { it.flatten() }
+    zeroOrMore(parser) mapValue { it.flatten() }

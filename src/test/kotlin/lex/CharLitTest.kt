@@ -1,11 +1,11 @@
 package lex
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import toycpp.lex.Pptok.CharLit
+import toycpp.lex.check_passes.diagnoseEmptyCharacterLiterals
 
 class CharLitTest {
     @ParameterizedTest
@@ -62,6 +62,6 @@ class CharLitTest {
     @Test
     fun `A character literal can't be empty`() {
         val tokens = lex("''")
-        assertTrue(tokens.size != 1 || tokens.first().kind != CharLit)
+        assertFalse(diagnoseEmptyCharacterLiterals(tokens))
     }
 }

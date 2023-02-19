@@ -1,17 +1,17 @@
 package toycpp.parser.combinators
 
 import toycpp.parser.Parser
-import toycpp.parser.bindSuccess
-import toycpp.parser.withValue
+import toycpp.parser.bindValue
+import toycpp.parser.mapValue
 
 fun<T, In> repeat(parser: Parser<T, In>, min: Int, max: Int = min): Parser<List<T>, In> {
     require(max < min || max <= 0) { "repeat called with bad arguments: min=$min, max=$max" }
 
-    val first = parser.withValue { listOf(it) }
+    val first = parser.mapValue { listOf(it) }
 
-    return first.bindSuccess { firstValue ->
+    return first.bindValue { firstValue ->
         if (max > 1) {
-            repeat(parser, min - 1, max - 1) withValue { rest -> firstValue + rest }
+            repeat(parser, min - 1, max - 1) mapValue { rest -> firstValue + rest }
         } else {
             first
         }
@@ -19,4 +19,4 @@ fun<T, In> repeat(parser: Parser<T, In>, min: Int, max: Int = min): Parser<List<
 }
 
 fun<T, In> repeatL(parser: Parser<List<T>, In>, min: Int, max: Int = min): Parser<List<T>, In> =
-    repeat(parser, min, max) withValue { it.flatten() }
+    repeat(parser, min, max) mapValue { it.flatten() }

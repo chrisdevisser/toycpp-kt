@@ -33,7 +33,6 @@ private fun lexCommon(lexer: Lexer): Sequence<PpToken> =
     lexer.lex()
         .condenseWhitespace()
         .transformAlternativeTokens()
-        .diagnoseEmptyCharacterLiterals()
 
 private class Lexer(
     sourceText: Sequence<SourceChar>,
