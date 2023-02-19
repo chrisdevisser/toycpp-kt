@@ -1,5 +1,7 @@
 package toycpp.lex
 
+import toycpp.encoding.formFeed
+import toycpp.encoding.verticalTab
 import toycpp.lex.ppinterface.PpContextHolder
 import toycpp.location.SourceChar
 import toycpp.parser.*
@@ -28,9 +30,6 @@ private fun genToken(kind: Pptok): (Iterable<SourceChar>) -> PpToken {
 }
 
 fun createCppLexer(ppContext: PpContextHolder, lexContext: LexContextHolder): CppLexer {
-    val verticalTab = Char(11)
-    val formFeed = Char(12)
-
     // First, primitives. These can be reused, but are direct representations of the standard token descriptions.
     // [lex.name]
     val nondigit = any('a'..'z') or any('A'..'Z') or +'_'
@@ -52,7 +51,7 @@ fun createCppLexer(ppContext: PpContextHolder, lexContext: LexContextHolder): Cp
     val comment = lineComment or blockComment
 
     // [lex.pptoken]
-    val rawWhitespace = oneOrMoreL(any(" \t\n${verticalTab}${formFeed}"))
+    val rawWhitespace = oneOrMoreL(any(" \t\n$verticalTab$formFeed"))
     val whitespace = comment or rawWhitespace
 
     // Finally, actual tokens

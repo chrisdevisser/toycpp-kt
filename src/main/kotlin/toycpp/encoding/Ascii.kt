@@ -7,6 +7,8 @@ import toycpp.location.LocationTracker
 
 val MinAsciiChar = Char(0)
 val MaxAsciiChar = Char(127)
+val verticalTab = Char(11)
+val formFeed = Char(12)
 
 /**
  * Converts the given bytes of a file to an ASCII-compatible BSCS (basic source character set) string per lex.charset.
@@ -20,7 +22,7 @@ val MaxAsciiChar = Char(127)
 fun ensureBscsAscii(filename: String, bytes: Iterable<UByte>): String? {
     val locTracker = LocationTracker(filename)
     val bscsChars =
-            " \t\n" + Char(11) + Char(12) + // Vertical tab, form feed
+            " \t\n" + verticalTab + formFeed +
             ('a'..'z').joinToString("") +
             ('A'..'Z').joinToString("") +
             ('0'..'9').joinToString("") +
@@ -53,8 +55,8 @@ fun escapeAsciiStringForHumans(s: String): String {
         '\b' to "\\b",
         '\t' to "\\t",
         '\n' to "\\n",
-        Char(11) to "\\v",
-        Char(12) to "\\f",
+        verticalTab to "\\v",
+        formFeed to "\\f",
         '\r' to "\\r",
         '\\' to "\\\\",
         Char(127) to "\\DEL"

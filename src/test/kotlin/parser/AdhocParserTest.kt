@@ -9,10 +9,6 @@ import toycpp.parser.ParseResult
 import toycpp.parser.ParseResult.Success
 
 class AdhocParserTest {
-    init {
-        setNewCollectorAsSink()
-    }
-
     @Test
     fun `An adhoc parser uses the given parsing function`() {
         var called = false

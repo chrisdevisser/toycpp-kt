@@ -1,6 +1,5 @@
 package lex
 
-import assertIterableMatches
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -15,7 +14,7 @@ class IdentifierTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == Identifier)
+        assertEquals(Identifier, tokens.first().kind)
     }
 
     @Test
@@ -26,7 +25,7 @@ class IdentifierTest {
 
     @ParameterizedTest
     @ValueSource(strings = [
-        "abc", "_abc", "\\u9876abc", "\\U00000000xyz",
+        "abc", "defined", "_abc", "\\u9876abc", "\\U00000000xyz",
         "a123", "_123", "\\u000000", "\\udeadbeef2",
         "a_", "__", "\\u5554__", "\\udeadbeef_",
         "a\\u1234\\Udeadbeef", "_\\Udeadbeef\\u1234", "\\u1234\\Udeadbeef", "\\Udeadbeef\\u1234",
@@ -36,7 +35,7 @@ class IdentifierTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == Identifier)
+        assertEquals(Identifier, tokens.first().kind)
     }
 
     @ParameterizedTest
@@ -45,7 +44,7 @@ class IdentifierTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == Identifier)
+        assertEquals(Identifier, tokens.first().kind)
     }
 
     @ParameterizedTest
@@ -54,6 +53,13 @@ class IdentifierTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == Identifier)
+        assertEquals(Identifier, tokens.first().kind)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["and", "and_eq", "bitor", "or_eq", "or", "xor_eq", "xor", "not", "compl", "not_eq", "bitand"])
+    fun `Alternative tokens are not identifiers`(input: String) {
+        val tokens = lex(input)
+        assertTrue(tokens.size != 1 || tokens.first().kind != Identifier)
     }
 }

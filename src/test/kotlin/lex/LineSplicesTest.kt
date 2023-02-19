@@ -3,12 +3,12 @@ package lex
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
-import text
 import toycpp.lex.LexContext
 import toycpp.lex.LexContextHolder
 import toycpp.lex.withLinesSpliced
 import toycpp.location.SourceChar
 import toycpp.location.SourceLocation
+import toycpp.location.toText
 import toycpp.location.withLocations
 import withDummyLocations
 
@@ -19,7 +19,7 @@ class LineSplicesTest {
 
         val withoutLineSplices = input.withDummyLocations().withLinesSpliced(LexContextHolder())
 
-        assertEquals(input, withoutLineSplices.text())
+        assertEquals(input, withoutLineSplices.toText())
     }
 
     // This is based on an interpretation of lex.phases/2 that the spirit is to always have a trailing blank line.
@@ -29,7 +29,7 @@ class LineSplicesTest {
 
         val withoutLineSplices = input.withDummyLocations().withLinesSpliced(LexContextHolder())
 
-        assertEquals(input, withoutLineSplices.text())
+        assertEquals(input, withoutLineSplices.toText())
     }
 
     // "Only the last backslash on any physical source line shall be eligible for being part of such a splice."
@@ -43,7 +43,7 @@ class LineSplicesTest {
 
         val withoutLineSplices = input.withDummyLocations().withLinesSpliced(LexContextHolder())
 
-        assertEquals("line 1\\\n", withoutLineSplices.text())
+        assertEquals("line 1\\\n", withoutLineSplices.toText())
     }
 
     @Test
@@ -56,7 +56,7 @@ class LineSplicesTest {
         for ((input, expected) in inputOutputPairs) {
             val withoutLineSplices = input.withDummyLocations().withLinesSpliced(LexContextHolder())
 
-            assertEquals(expected, withoutLineSplices.text())
+            assertEquals(expected, withoutLineSplices.toText())
         }
     }
 
@@ -69,7 +69,7 @@ class LineSplicesTest {
 
         val withoutLineSplices = input.withDummyLocations().withLinesSpliced(LexContextHolder(LexContext.InRawStringLiteral))
 
-        assertEquals(input, withoutLineSplices.text())
+        assertEquals(input, withoutLineSplices.toText())
     }
 
     @Test
@@ -80,7 +80,7 @@ class LineSplicesTest {
 
         val withoutLineSplices = input.withDummyLocations().withLinesSpliced(LexContextHolder())
 
-        assertEquals(input, withoutLineSplices.text())
+        assertEquals(input, withoutLineSplices.toText())
     }
 
     @Test
@@ -92,7 +92,7 @@ class LineSplicesTest {
 
         val withoutLineSplices = input.withDummyLocations().withLinesSpliced(LexContextHolder())
 
-        assertEquals(input, withoutLineSplices.text())
+        assertEquals(input, withoutLineSplices.toText())
     }
 
     @Test

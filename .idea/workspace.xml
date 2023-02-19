@@ -4,62 +4,51 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="950732b7-04b9-44e0-b794-751e5e1a4a66" name="Changes" comment="I hate Gradle, I didn't even change anything since yesterday">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/control_structure/While.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/DfaNodeDsl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/InProgressDfa.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/InProgressNode.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/matchers/AnyMatchingCharacter.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/matchers/AnySatisfyingPredicate.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/matchers/Char.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/matchers/Seq.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/extensions/SequenceExtensions.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/iterators/CurrentIterator.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/AdhocParser.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Fail.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/FallbackParser.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Lit.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/ParseResult.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Seq.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/SeqParser.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Success.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Lookahead.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Not.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/OneOrMore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Optional.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Or.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Repeat.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Then.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/ZeroOrMore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/CapturingSequence.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/CharLitTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/IdentifierTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/LexTestUtils.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/LexerTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/PpnumTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/parser/AdhocParserTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/parser/FallbackParserTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/parser/NotTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/parser/ParserTestUtils.kt" afterDir="false" />
+    <list default="true" id="950732b7-04b9-44e0-b794-751e5e1a4a66" name="Changes" comment="Add docs back in">
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/check_passes/Check.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/check_passes/EmptyCharLit.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/check_passes/InvalidTokens.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/fixup_passes/AlternativeTokens.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/fixup_passes/Comments.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/fixup_passes/CondenseWhitespace.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/integration/CommentsInLiteralsTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/integration/RawStringLineSpliceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/AlternativeTokensTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/CharUdlTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/CommentTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/OpAndPuncTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/OtherCharactersTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/StringLitTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lex/StringUdlTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/DiagnosticReporter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/DiagnosticReporter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/Dfa.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/Dfa.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/DfaDsl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/DfaDsl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/IB.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/conditionally-supported.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/standard notes/standard-notes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/standard notes/standard-notes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/control_structure/While.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/control_structure/While.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/diagnostics/Diagnostic.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/diagnostics/Diagnostic.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/diagnostics/DiagnosticSystem.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/diagnostics/DiagnosticSystem.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/encoding/Ascii.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/encoding/Ascii.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/extensions/Peek1Sequence.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/sequences/Peek1Sequence.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/graph/GraphCover.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/graph/GraphCover.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/iterators/CurrentIterator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/iterators/CurrentIterator.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Comments.kt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/CppDfa.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/CppDfa.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/CppDfa3.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/CppDfa3.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Lexer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Lexer.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Pptok.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Pptok.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Token.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Token.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/location/SourceChar.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/location/SourceChar.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/location/SourceLocation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/location/SourceLocation.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Parser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Parser.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/toycpp.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/toycpp.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/kotlin/TestExtensions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/TestExtensions.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/CharLitTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/CharLitTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/IdentifierTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/IdentifierTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/LexTestUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/LexTestUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/LexerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/LexerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/LineSplicesTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/LineSplicesTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/PpnumTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/PpnumTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/parser/AdhocParserTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/parser/AdhocParserTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/parser/FallbackParserTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/parser/FallbackParserTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/parser/NotTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/parser/NotTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +68,12 @@
         </task>
         <projects_view>
           <tree_state>
-            <expand />
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="toycpp" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
             <select />
           </tree_state>
         </projects_view>
@@ -110,7 +104,13 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "F:/code/toycpp"
+    "last_opened_file_path": "F:/code/toycpp",
+    "settings.editor.selected.configurable": "editor.preferences.completion"
+  },
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "kotlin"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
@@ -126,6 +126,75 @@
     </key>
   </component>
   <component name="RunManager" selected="Gradle.Tests in 'toycpp.test'">
+    <configuration name="LexerTest.Tokens with whitespace in front advertise that fact" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;lex.LexerTest.Tokens with whitespace in front advertise that fact&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="RawStringLineSpliceTest.Line splices are not reverted after the closing quote of a raw string literal" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;integration.RawStringLineSpliceTest.Line splices are not reverted after the closing quote of a raw string literal&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="StringLitTest.A string literal can be a raw string" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;lex.StringLitTest.A string literal can be a raw string&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="Tests in 'toycpp.test'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -157,17 +226,33 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Gradle.LexerTest.Tokens with whitespace in front advertise that fact" />
+      <item itemvalue="Gradle.RawStringLineSpliceTest.Line splices are not reverted after the closing quote of a raw string literal" />
+      <item itemvalue="Gradle.StringLitTest.A string literal can be a raw string" />
       <item itemvalue="Gradle.Tests in 'toycpp.test'" />
       <item itemvalue="Kotlin.TempMainKt" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.Tests in 'toycpp.test'" />
+        <item itemvalue="Gradle.LexerTest.Tokens with whitespace in front advertise that fact" />
+        <item itemvalue="Gradle.RawStringLineSpliceTest.Line splices are not reverted after the closing quote of a raw string literal" />
+        <item itemvalue="Gradle.StringLitTest.A string literal can be a raw string" />
         <item itemvalue="Kotlin.TempMainKt" />
       </list>
     </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="StructuralSearchPlugin">
+    <replaceConfiguration name="lex($Expr$, &quot;test&quot;)" created="1676776742698" uuid="6604102b-b6ba-3a08-a9fe-d86e5b5fa868" text="lex($Expr$, &quot;test&quot;)" recursive="false" caseInsensitive="true" type="Kotlin" pattern_context="default" scope_type="PROJECT" scope_descriptor="" reformatAccordingToStyle="false" shortenFQN="false" replacement="lex($Expr$)" history="1">
+      <constraint name="__context__" within="" contains="" />
+      <constraint name="Expr" within="" contains="" />
+    </replaceConfiguration>
+    <searchConfiguration name="lex($Expr$, &quot;test&quot;)" created="1676776599313" uuid="6604102b-b6ba-3a08-a9fe-d86e5b5fa868" text="lex($Expr$, &quot;test&quot;)" recursive="true" caseInsensitive="true" type="Kotlin" pattern_context="default" scope_type="PROJECT" scope_descriptor="" history="1">
+      <constraint name="__context__" within="" contains="" />
+      <constraint name="Expr" within="" contains="" />
+    </searchConfiguration>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="950732b7-04b9-44e0-b794-751e5e1a4a66" name="Changes" comment="" />
@@ -183,7 +268,21 @@
       <option name="project" value="LOCAL" />
       <updated>1675521857577</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="DFA and lexer done minus bugs and raw strings, some lexer/DFA tests">
+      <created>1676006923199</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1676006923199</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Add docs back in">
+      <created>1676006954710</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1676006954710</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -199,7 +298,9 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="I hate Gradle, I didn't even change anything since yesterday" />
-    <option name="LAST_COMMIT_MESSAGE" value="I hate Gradle, I didn't even change anything since yesterday" />
+    <MESSAGE value="DFA and lexer done minus bugs and raw strings, some lexer/DFA tests" />
+    <MESSAGE value="Add docs back in" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add docs back in" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -208,10 +309,10 @@
           <properties class="java.lang.NullPointerException" package="java.lang" />
           <option name="timeStamp" value="30" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/toycpp/lex/CppDfa.kt</url>
-          <line>204</line>
-          <option name="timeStamp" value="32" />
+        <line-breakpoint type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Lexer.kt</url>
+          <line>203</line>
+          <option name="timeStamp" value="77" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -222,5 +323,9 @@
         </breakpoint>
       </default-breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

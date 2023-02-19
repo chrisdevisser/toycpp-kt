@@ -7,10 +7,6 @@ import setNewCollectorAsSink
 import toycpp.parser.combinators.or
 
 class FallbackParserTest {
-    init {
-        setNewCollectorAsSink()
-    }
-
     @Test
     fun `Parsing a or b succeeds with a`() {
         val parser = +'a' or +'b'

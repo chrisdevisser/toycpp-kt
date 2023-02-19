@@ -3,7 +3,15 @@ package toycpp.lex
 import toycpp.dfa.DfaNode.Id
 import toycpp.dfa.DfaNodeDsl
 import toycpp.dfa.dfa
+import toycpp.encoding.formFeed
+import toycpp.encoding.verticalTab
 import toycpp.lex.Pptok.*
+
+// TODO: Consider how to allow an unfinished escape code or UCN.
+//     It's still desirable to pretend it's valid and lex the rest of the token, but then produce an invalid token.
+//     The normal result would be the lexer pointing to the start of a string literal and saying
+//     Maybe a DSL element that specifies a fallback ID for where to go if nothing matches.
+//     This needs to be used with care because it prevents the ordinary backtracking behaviour.
 
 // First, primitives. These can be reused, but are direct representations of the standard token descriptions.
 
@@ -39,7 +47,7 @@ fun createCppDfa() = dfa {
     }
 
     // Block comments [lex.comment]
-    seq("/*") connects node("block comment") {
+    seq("/*") connects acceptingNode("block comment", InvalidUnterminatedBlockComment) {
         val blockCommentId = selfId
 
         '*' connects node("block comment + '*'") {
@@ -80,16 +88,18 @@ fun createCppDfa() = dfa {
     // Character literals: [lex.ccon]
     // String literals: [lex.string]
     // UDLs: [lex.ext]
-    val charLit = acceptingNode("character literal", CharLit) {
+    val charLit = acceptingNode("character literal end", CharLit) {
         acceptIdentifier("character UDL", CharUdl)
     }
 
-    val stringLit = acceptingNode("string literal", StringLit) {
+    val stringLit = acceptingNode("string literal end", StringLit) {
         acceptIdentifier("string UDL", StringUdl)
     }
 
-    val partialCharLit = buildPartialCharOrStringLiteral("partial character literal", '\'', charLit)
-    val partialStringLit = buildPartialCharOrStringLiteral("partial string literal", '"', stringLit)
+    // This allows an empty character literal, which is later checked.
+    // It's okay to delay the check because the alternative is a lone ' token, which is UB.
+    val partialCharLit = buildPartialCharOrStringLiteral("character literal", '\'', charLit)
+    val partialStringLit = buildPartialCharOrStringLiteral("string literal", '"', stringLit)
 
     '\'' connects partialCharLit
     '"' connects partialStringLit
@@ -170,12 +180,18 @@ fun createCppDfa() = dfa {
     seq("<<") accepts LeftShift
     seq(">>") accepts RightShift
     seq("<<=") accepts LeftShiftEquals
-    seq(">==") accepts RightShiftEquals
+    seq(">>=") accepts RightShiftEquals
     seq("++") accepts PlusPlus
     seq("--") accepts MinusMinus
     ',' accepts Comma
 
-    // Anything not covered except ` @ $, which aren't in the BSCS.
+    // Whitespace: [lex.token]
+    '\n' accepts Newline
+    any(" \t$verticalTab$formFeed") connects acceptingNode("whitespace", Whitespace) {
+        any(" \t$verticalTab$formFeed") connects selfId
+    }
+
+    // Anything not covered except ` @ $ (and non-whitespace control characters), which aren't in the BSCS.
     // ' and " are UB as tokens on their own per [lex.pptoken]/2
     '\\' accepts OtherCharacter
 
@@ -184,25 +200,9 @@ fun createCppDfa() = dfa {
     seq("%>") accepts RBrace
     seq("<:") accepts LSquareBracket
     seq(":>") accepts RSquareBracket
-    seq("<::") accepts SpecialCaseTemplateLex // This doesn't follow maximal munch. The lexer has to produce < ::.
+    seq("<::") accepts SpecialCaseTemplateLex // This doesn't follow maximal munch. The lexer sometimes has to produce < ::
     seq("%:") accepts Pound
-    seq("%:%") accepts SpecialCaseDigraphLex // We're stuck at this point. The lexer has to produce %: %.
     seq("%:%:") accepts Concat
-    // TODO: Add kw pass
-//        seq("and") accepts And
-//        seq("bitor") accepts BitOr
-//        seq("or") accepts Or
-//        seq("xor") accepts Xor
-//        seq("compl") accepts Compl
-//        seq("bitand") accepts BitAnd
-//        seq("and_eq") accepts AndEquals
-//        seq("or_eq") accepts OrEquals
-//        seq("xor_eq") accepts XorEquals
-//        seq("not") accepts Not
-//        seq("not_eq") accepts NotEqualTo
-
-    // And some other fun stuff.
-    '\n' accepts StartOfLine
 }
 
 /**
@@ -216,7 +216,7 @@ private fun DfaNodeDsl<Pptok>.continueIdentifierTo(identifierId: Id, exclusions:
 /**
  * Inserts an identifier DFA into the current node. Accepts the given value within the identifier.
  */
-private fun DfaNodeDsl<Pptok>.acceptIdentifier(id: String, acceptValue: Pptok) {
+internal fun DfaNodeDsl<Pptok>.acceptIdentifier(id: String, acceptValue: Pptok) {
     val identifier = acceptingNode(id, acceptValue) {
         continueIdentifierTo(selfId)
     }
@@ -252,6 +252,8 @@ private fun DfaNodeDsl<Pptok>.connectUcnTo(target: Id) {
  * Connects to the given end node upon seeing the given ending character.
  */
 private fun DfaNodeDsl<Pptok>.buildPartialCharOrStringLiteral(id: String, endChar: Char, endId: Id) =
+    // This state accepts a pseudotoken to mark it as an unterminated character or string literal.
+    // It's okay to accept this instead of backtracking because the alternative is a single ' or " token, which is UB.
     acceptingNode(id, InvalidUnterminatedLiteral) {
         val partialLitId = selfId
 
@@ -291,5 +293,5 @@ private fun DfaNodeDsl<Pptok>.buildPartialCharOrStringLiteral(id: String, endCha
  */
 private fun DfaNodeDsl<Pptok>.fillPartialLit(endChar: Char, endId: Id) {
     anyExcept("$endChar\n\\$octalDigit") connects selfId
-    endChar connects endId // TODO: Add later check for empty char
+    endChar connects endId
 }

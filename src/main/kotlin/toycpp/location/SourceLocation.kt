@@ -18,6 +18,9 @@ data class SourceLocation(
     override fun toString() =
         "<$filename> $line:$col"
 
+    fun movePast(): SourceLocation =
+        copy(col = col + 1)
+
     companion object {
         /**
          * Compares two source locations while ignoring the filename. The line number is prioritized over the column number.

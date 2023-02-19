@@ -1,0 +1,92 @@
+Phases of translation: [lex.phases]
+    1. Map characters to BSCS and add UCNs for non-BSCS characters.
+    2. Splice lines. Pretend files end with a newline.
+    3. Lex into pptokens and whitespace, replace comments with one space. Revert UCNs and line splices in raw strings.
+    4. Apply PP directives. Expand macros. Apply _Pragmas. Include headers.
+        https://marc.info/?l=boost&m=118835769257658
+    5. Encode string literals.
+        -might as well do character literals here too
+        -don't add \0 until the end of p6 
+        -UCN in string literal can produce a surrogate pair or MBCS
+    6. Concatenate adjacent string literals.
+        [lex.string]/11-12
+    7. Compile each TU: Convert to C++ tokens, parse, resolve, type check, perform semantic analysis.
+    8. Create instantiation units: Find definitions of instantiation, perform instantiations.
+        -discover list of required instantiations per TU
+        -perform instantiations to produce an instantiation unit
+        -error if any instantiation fails
+        -mangle names
+    9. Link TUs: Resolve external entities, link library components, produce executable.
+        -resolve external entities
+
+Test Cases
+    -0-9 are in-order consecutive in each execution character set [lex.charset/3]
+    -comments cannot be created by a macro [lex.operators], [cpp.concat]
+    -UCNs are not expanded in raw string literals
+    -UCNs: http://open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3881.pdf
+    -pp: & ## bitand produces &bitand, not && or and
+    -pp: bitand ## bitand produces bitandbitand, not && or and
+    -pp: stringizing any form of bitand produces "bitand", not "&"
+    -header ending in line comment shouldn't affect another file
+    -string concat: "\xA" "B" is not an escape sequence
+
+Optional Diagnostics
+    -specific error if `register` appears [lex.key]
+    -warn if #line filename does not exist [cpp.line]
+    -warn if #line number would cause rest of file to go out of bounds of #line file [cpp.line]
+    -detect UB when seeing ' or " that doesn't match a token (UnterminatedLiteral, invalid escape codes) [lex.pptoken]/2
+    -error if \v or \f appears without only whitespace until comment end [lex.comment]
+    -warn if switching the order of # and ## changes the result
+    -warn if switching the associativity of ## changes the result
+    -detect UB if line splicing results in a UCN except in a raw string literal
+    -detect UB if PP concatenation results in UCN
+    -' " // /* */ in header-name produce good errors if still unsupported
+    -detect reserved identifiers: __ anywhere or _Capital at start or _ at start in global ns
+    -warn on wide character literal with single character not representable in the wide execution character set [lex.ccon]/5
+    -warn on multicharacter wide literal [lex.ccon]/5
+    -warn on \? (redundant without trigraphs)
+    -warn on \x or \### that is out of range
+
+Optional Features
+    -if supporting CRLF, map physical source file characters to basic source characters and update IB
+    -if supporting Unicode, map between UCNs in phase 1 (C++23 specifies UCN → Unicode in p3)
+    -if supporting more than BSCS, update lexer to allow control characters as OtherCharacter
+    -keep track of comment/whitespace info
+    -when supporting utf8 source, ensure UCN replacements function identically in header-names
+    -IB: if supported, values of extra escape sequences [lex.ccon]/6
+
+Diagnostics
+    -error when source ends in partial pp token [lex.phases]/3
+        -specific error for character/string literals and comments
+    -error unless pptoken matches kw, id, lit, op, or punc
+    -pp: error if UCN in identifier is not in [tab:lex.name.allowed] [lex.charset]
+    -pp: error if UCN beginning an identifier is in 0300-036F, 1DC0-1DFF, 20D0-20DD, or FE20-FE2F [lex.charset]
+    -pp: error when UCN is not a code point (0-10FFFF) or is a surrogate code point (D800-DFFF) [lex.charset]
+    -pp: error when UCN outside of char/string literal is a control character (0-1F, 7F-9F) or in BSCS [lex.charset]
+    -error if integer literal value is out of range for every allowable type [lex.icon/4]
+    -error if character literal with Unicode encoding prefix has more than one character [lex.ccon]
+    -error if character literal value doesn't fit into Unicode encoding type [lex.ccon]
+    -error on multicharacter literal [lex.ccon]/1
+    -error on character literal with single character not reprentable in execution character set [lex.ccon]/1
+    -error if floating-point literal value is out of range [lex.fcon]
+    -error if u8 string is adjacent to wide string
+
+Lex
+    -condense whitespace (keep StartOfLine, remove Whitespace, remove Comment) [lex.phases]/3
+    -maybe import/module/export tokens [lex.pptoken]/4
+
+PP 
+    -relex as header name in context (import x2, #include, __has_include) [lex.pptoken]/3.3
+    -interpret header-name as path with / converted to system separator
+
+Token Conversion
+    -produce identifiers instead of keyword or tokens like && inside of attributes [lex.key]
+    -convert ppnumber to integer and floating-point literal tokens [lex.icon][lex.fcon]
+
+Parse
+
+Type
+    -integer literal: http://eel.is/c++draft/tab:lex.icon.type [basic.fundamental]
+    -character literal: [lex.ccon][basic.fundamental]
+    -floating-point literal: [lex.fcon]
+    -string literal: [lex.string]

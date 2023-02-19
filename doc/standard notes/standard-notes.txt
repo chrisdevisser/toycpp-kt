@@ -22,6 +22,7 @@
     [lex.pptoken]
         -"import-keyword", "module-keyword", and "export-keyword" are placeholder tokens from preprocessing import and module directives
         -lexing mandates that R" and similar raw string introducers actually introduce a raw string literal
+            -the same holds true for character and string literals because the backtracking would otherwise treat ' or " as its own token, which isn't allowed
         -UCNs remain as-is in raw strings, as well as extended characters in the source and backslash-newlines
             -if one is reverted, this is done before looking for delim/paren/string characters
         -the sequence <:: is treated as < :: instead of <: : unless next character is : or >
@@ -37,3 +38,5 @@
         -module, import, override, final are soft keywords
     [lex.icon]
         -integer literal types depend on value, suffix, and base: http://eel.is/c++draft/tab:lex.icon.type
+    [lex.string]
+        -narrow strings include u8

@@ -6,10 +6,10 @@ import toycpp.location.withLocations
 
 private val dfa = createCppDfa()
 
-fun lex(input: String, removeMarkerTokens: Boolean = true): List<PpToken> {
-    val (sourceWithLocations, _) = input.asSequence().withLocations("test")
-    return lazyLexPpTokens("test", sourceWithLocations, dfa, LexContextHolder()).toList()
-        .filterNot { removeMarkerTokens && it.kind == Pptok.StartOfLine }
+fun lex(input: String, filename: String = "test"): List<PpToken> {
+    val lexContext = LexContextHolder()
+    val source = input.asSequence().withLocations(filename).first.withLinesSpliced(lexContext)
+    return lazyLexPpTokens(source, dfa, lexContext).toList()
 }
 
 fun assertTokenKindsMatch(tokens: List<PpToken>, vararg kinds: Pptok) {

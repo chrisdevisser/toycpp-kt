@@ -57,7 +57,23 @@ class InvalidSourceEncoding(val expectedEncoding: String, val badByteValue: UByt
         "Expected source file to be $expectedEncoding, but got invalid character with bad byte value of $badByteValue (${badByteValue.toString(radix = 16)})."
 }
 
+/**
+ * Issued when a token can't be lexed because there is no valid token matching the input.
+ */
 class InvalidToken(val lexeme: String) : Diagnostic(Error) {
     override fun formatMessage(): String =
         "Lexing a token couldn't finish after matching '${escapeAsciiStringForHumans(lexeme)}'."
+}
+
+/**
+ * Issued when a character literal is empty.
+ */
+class EmptyCharacterLiteral(val lexeme: String) : Diagnostic(Error) {
+    override fun formatMessage(): String =
+        "Empty character literal: $lexeme"
+}
+
+class RawStringDelimiterTooLong(val delimiter: String) : Diagnostic(Error) {
+    override fun formatMessage(): String =
+        "The delimiter of the raw string literal must be at most 16 characters. This one is ${delimiter.length} ('${escapeAsciiStringForHumans(delimiter)}')"
 }

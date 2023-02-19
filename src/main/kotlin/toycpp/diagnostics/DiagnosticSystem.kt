@@ -45,7 +45,7 @@ class DiagnosticSystem {
  * @param location The best-effort location within a source file where this diagnostic occurred
  */
 fun diag(d: Diagnostic, location: SourceLocation?) {
-    checkNotNull(DiagnosticSystem.sink) { "The diagnostic sink was not set." }
+//    checkNotNull(DiagnosticSystem.sink) { "The diagnostic sink was not set." }
 
     if (d.severity == Error) {
         DiagnosticSystem.hasErrorBeenIssued = true

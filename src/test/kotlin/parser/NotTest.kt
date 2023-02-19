@@ -11,10 +11,6 @@ import toycpp.parser.combinators.oneIfNot
 import toycpp.parser.combinators.then
 
 class NotTest {
-    init {
-        setNewCollectorAsSink()
-    }
-
     @ParameterizedTest
     @ValueSource(chars = ['a', 'b', '1', '.', '@', '\n'])
     fun `Parsing not a character passes for other characters`() {

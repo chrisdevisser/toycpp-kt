@@ -3,12 +3,13 @@ package toycpp
 import toycpp.diagnostics.DiagnosticSystem
 import toycpp.encoding.ensureBscsAscii
 import toycpp.filesystem.Filesystem
-import toycpp.lex.LexContext
-import toycpp.lex.LexContextHolder
-import toycpp.lex.createCppDfa
+import toycpp.lex.*
+import toycpp.lex.check_passes.diagnoseEmptyCharacterLiterals
+import toycpp.lex.check_passes.diagnoseInvalidTokens
+import toycpp.lex.check_passes.runAllChecks
+import toycpp.lex.fixup_passes.removeComments
 import toycpp.lex.ppinterface.PpContext
 import toycpp.lex.ppinterface.PpContextHolder
-import toycpp.lex.withLinesSpliced
 import toycpp.location.withLocations
 import java.nio.file.Path
 import kotlin.system.exitProcess
@@ -59,9 +60,18 @@ fun compileToBinary(sourcePath: Path, filesystem: Filesystem) {
     // Whitespace is kept only as a token flag indicating leading whitespace.
     val ppContext = PpContextHolder(PpContext.NothingSpecial)
     val dfa = createCppDfa()
-//    val lexer = Lexer(sourceWithoutLineSplices, locationTracker)
-//    val pptokens = lexer.lazyLexPptokens().removeComments()
+    val pptokens = lazyLexPpTokens(sourceWithoutLineSplices, dfa, lexContext)
+        .removeComments()
+        .toList()
 
+    if (!runAllChecks(pptokens,
+        ::diagnoseEmptyCharacterLiterals,
+        ::diagnoseInvalidTokens,
+    )) {
+        return
+    }
+
+    // /4: Preprocessing
 }
 
 fun linkToExecutable(binaries: List<Unit>) {

@@ -1,25 +1,27 @@
 Per [intro.compliance.general], this is a list of implementation-defined behaviours that are required to be documented.
 
-[defns.diagnostic]
-Which output messages are diagnostics?
+TODO: document "all locale-specific characteristics": https://docs.oracle.com/cd/E19205-01/819-5265/bjayv/index.html
+
+## [defns.diagnostic]
+**Which output messages are diagnostics?**
 
 TODO
 
-[defns.order.ptr]
-What is the ordering of pointer values?
+## [defns.order.ptr]
+**What is the ordering of pointer values?**
 
 Pointers are compared via the integral value of their address.
 A pointer p1 is ordered before a distinct pointer p2 iff the integral value of p1's address is less than the integral value of p2's address.
 
 This ordering is simple and intuitive. It is straightforward to implement and imposes no overhead.
 
-[intro.abstract]
-What constitutes an interactive device?
+## [intro.abstract]
+**What constitutes an interactive device?**
 
 TODO
 
-[lex.phases]
-How are physical source file characters mapped to the basic source character set?
+## [lex.phases]
+**How are physical source file characters mapped to the basic source character set?**
 
 The mapping from accepted ASCII source file characters to the basic source character set is an identity mapping.
 A source file character is mapped to the identical character in the basic source character set.
@@ -28,8 +30,8 @@ This restriction is intended to be lifted in the future.
 
 TODO: Unicode
 
-[lex.phases]
-What is the set of physical source file characters accepted?
+## [lex.phases]
+**What is the set of physical source file characters accepted?**
 
 The set of accepted physical source file characters is exactly the basic source character set in ASCII representation.
 Any character present that is not in the basic source character set will trigger an error.
@@ -38,18 +40,18 @@ This restriction is intended to be lifted in the future.
 
 TODO: Unicode
 
-[lex.phases]
-Are the sources for interface dependency module units and header units required to be available?
+## [lex.phases]
+**Are the sources for interface dependency module units and header units required to be available?**
 
 TODO
 
-[lex.phases]
-Is the source code for the definitions of required templates required to be available?
+## [lex.phases]
+**Is the source code for the definitions of required templates required to be available?**
 
 TODO
 
-[lex.charset]
-What are the execution character set and execution wide-character set?
+## [lex.charset]
+**What are the execution character set and execution wide-character set?**
 
 The only supported execution character set is the basic execution character set.
 The only supported execution wide-character set is the basic execution wide-character set.
@@ -58,8 +60,8 @@ This restriction is intended to be lifted in the future.
 
 TODO: Unicode
 
-[lex.header] [cpp.include]
-How are characters of header-names mapped to headers or to external source file names?
+## [lex.header] [cpp.include]
+**How are characters of header-names mapped to headers or to external source file names?**
 
 The characters are treated as a file path with separator converted from / to the system path separator. The <> form treats this path as relative to the system include path and then each user-provided include path. The "" form treats this path as relative to the file containing the #include directive, __has_include, or import directive containing the header-name in question.
 
@@ -71,12 +73,51 @@ TODO: UCNs
 TODO: Specify system include path for each supported system
 TODO: Specify how the user provides include paths
 
-[lex.header]
-What are the semantics of ', \, /*, and // in a header-name, and " in the <> form of a header-name?
+## [lex.header]
+**[Conditional] What are the semantics of ', \, /*, and // in a header-name, and " in the <> form of a header-name?**
 
 None of these are officially supported. \ can appear as part of a line splice, but that line splice is removed by this point.
 
-=============
+## [lex.ccon]
+**[Conditional] What is the value of a multicharacter literal?**
+
+Multicharacter literals are not supported.
+
+**[Conditional] What is the value of a character literal with a single character not representable in the execution character set?**
+
+This is not supported.
+
+**What is the value of a wide character literal with a single character not representable in the execution wide character set?**
+
+The value is 0xFBADC0DE. The leading F keeps it near the maximum value, out of codepoint range, while BADC0DE indicates a bug. TODO: This will also trigger a compiler warning.
+
+**What is the value of a wide multicharacter literal?**
+
+The value is 0xFBADC0DE for the same reasons as before.
+
+**[Conditional] What are the semantics of the additionally supported escape sequences?**
+
+No additional escape sequences are supported. These will trigger a compiler error.
+
+**What is the value of a character literal if it doesn't fit into char or wchar_t?**
+
+The value is 0 for char. This minimizes the damage done when trying to use it. For wchar_t, the value is 0xFBADC0DE for the same reasons as before. This will also trigger a compiler warning.
+
+**What is the encoding used to translate a UCN in a character literal if the character named has no encoding in the appropriate execution character set?**
+
+The UCN will be encoded as the value 0 in the execution character set and the value 0xFBADC0DE in the wide execution character set. TODO: Unicode
+
+## [lex.fcon]
+**If the value of a floating-point literal is not representable, how is the value chosen?**
+
+The value will be whatever Kotlin's kotlin.text.toDouble function chooses when given the lexeme. String to floating-point conversion is just a giant can of worms to open for a project like this.
+
+## [lex.string]
+**What is the behaviour of concatenating adjacent string literals with encoding prefixes other than the pairs specified?**
+
+No additional pairs are supported. A compiler error is issued.
+
+------------------
 
 Index of the rest of the implementation-defined behavior
 
@@ -97,10 +138,8 @@ behavior of iostream classes when traits::pos_type is not streampos or when trai
 behavior of non-standard attributes, [dcl.attr.grammar]
 behavior of strstreambuf::setbuf, [depr.strstreambuf.virtuals]
 bits in a byte, [intro.memory]
-choice of larger or smaller value of floating-point-literal, [lex.fcon]
 code unit sequence for conditional-escape-sequence, [lex.string]
 code unit sequence for non-representable string-literal, [lex.string]
-concatenation of some types of string-literals, [lex.string]
 conversions between pointers and integers, [expr.reinterpret.cast]
 converting function pointer to object pointer and vice versa, [expr.reinterpret.cast]
 default configuration of a pool, [mem.res.pool.mem]
@@ -313,14 +352,12 @@ value of bit-field that cannot represent
 assigned value, [expr.ass]
 incremented value, [expr.post.incr]
 initializer, [dcl.init.general]
-value of conditional-escape-sequence, [lex.ccon]
 value of ctype<char>::table_size, [facet.ctype.special.general]
 value of future_errc::broken_promise, [future.syn]
 value of future_errc::future_already_retrieved, [future.syn]
 value of future_errc::no_state, [future.syn]
 value of future_errc::promise_already_satisfied, [future.syn]
 value of has-attribute-expression for non-standard attributes, [cpp.cond]
-value of non-encodable character literal or multicharacter literal, [lex.ccon]
 value of pow(0,0), [complex.transcendentals]
 value of result of inexact integer to floating-point conversion, [conv.fpint]
 value representation of floating-point types, [basic.fundamental]

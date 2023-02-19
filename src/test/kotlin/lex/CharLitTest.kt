@@ -14,7 +14,7 @@ class CharLitTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == CharLit)
+        assertEquals(CharLit, tokens.first().kind)
     }
 
     @ParameterizedTest
@@ -23,7 +23,7 @@ class CharLitTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == CharLit)
+        assertEquals(CharLit, tokens.first().kind)
     }
 
     @ParameterizedTest
@@ -36,7 +36,7 @@ class CharLitTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == CharLit)
+        assertEquals(CharLit, tokens.first().kind)
     }
 
     @ParameterizedTest
@@ -56,6 +56,12 @@ class CharLitTest {
     @Test
     fun `A character literal can't contain newlines`() {
         val tokens = lex("'\n'")
+        assertTrue(tokens.size != 1 || tokens.first().kind != CharLit)
+    }
+
+    @Test
+    fun `A character literal can't be empty`() {
+        val tokens = lex("''")
         assertTrue(tokens.size != 1 || tokens.first().kind != CharLit)
     }
 }

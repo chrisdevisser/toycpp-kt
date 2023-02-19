@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import toycpp.lex.Pptok
 import toycpp.lex.Pptok.Ppnum
 
 
@@ -15,7 +14,7 @@ class PpnumTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == Ppnum)
+        assertEquals(Ppnum, tokens.first().kind)
     }
 
     @ParameterizedTest
@@ -24,7 +23,7 @@ class PpnumTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == Ppnum)
+        assertEquals(Ppnum, tokens.first().kind)
     }
 
     @Test
@@ -50,7 +49,7 @@ class PpnumTest {
         val tokens = lex(input)
 
         assertEquals(1, tokens.size)
-        assertTrue(tokens.first().kind == Ppnum)
+        assertEquals(Ppnum, tokens.first().kind)
     }
 
     @Test
