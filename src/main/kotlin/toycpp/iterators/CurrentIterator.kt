@@ -1,16 +1,23 @@
 package toycpp.iterators
 
 /**
- * Acts similarly to a C++ iterator. When in range, [_current] is not null and can be used repeatedly.
- * When out of range, [_current] is null and no more iteration can be done.
- * The iterator moves to the first element upon construction; [_current] is never null until the end of the range is reached.
+ * Acts similarly to a C++ iterator. When in range, [current] is not null and can be used repeatedly.
+ * When out of range, [current] is null and no more iteration can be done.
+ *
+ * Logically, [current] always refers to an element until the end of the range.
+ * However, in order to keep this behaviour while delaying the read of the next element, [lazyMoveNext] can be used.
  */
 class CurrentIterator<T>(private var iter: Iterator<T>) {
-    private var _current: T? = null
+    /**
+     * Null at the end of the range or when the next advance is delayed (including at construction).
+     */
+    private var _currentOrDelayed: T? = null
 
-    init {
-        moveNext() // Start on the first element instead of before the first element
-    }
+    /**
+     * Returns whether the iterator is in range.
+     */
+    fun hasCurrent(): Boolean =
+        _currentOrDelayed != null || iter.hasNext()
 
     /**
      * Returns the current value. The iterator must be in range.
@@ -18,43 +25,55 @@ class CurrentIterator<T>(private var iter: Iterator<T>) {
     val current: T
         get() {
             check(hasCurrent()) { "Attempted to access a range past the end." }
-            return _current!!
+            moveIfDelayed()
+            return _currentOrDelayed!!
         }
 
     /**
      * Returns the current value if the iterator is in range, else null.
      */
     fun currentOrNull(): T? =
-        _current
+        if (hasCurrent()) current else null
 
     /**
-     * Returns whether the iterator is in range.
-     */
-    fun hasCurrent(): Boolean =
-        _current != null
-
-    /**
-     * Moves the iterator to the next element. If the iterator is currently on the last element, moves the iterator out of range.
+     * Moves the iterator to the next element. If the iterator is currently on the last element, advances the iterator out of range.
      */
     fun moveNext() {
-        _current = if (iter.hasNext()) { iter.next() } else null
+        check(hasCurrent()) { "Attempted to iterate past the end of a range." }
+        moveIfDelayed()
+        _currentOrDelayed = if (iter.hasNext()) { iter.next() } else null
     }
 
     /**
-     * Attempts to move the iterator to the next element.
+     * Lazily advances the iterator to the next element.
+     * This move will take place the next time the current element is accessed or the iterator is advanced.
+     */
+    fun lazyMoveNext() {
+        _currentOrDelayed = null
+    }
+
+
+    /**
+     * Attempts to advance the iterator to the next element.
      * Returns the current element if the iterator is currently in range, else null.
      */
     fun tryConsume(): T? =
-        _current?.also { moveNext() }
+        if (hasCurrent()) consume() else null
 
     /**
      * Moves the iterator to the next element. The iterator must be in range.
      * Returns the current element.
      */
     fun consume(): T {
-        check(hasCurrent()) { "Attempted to move an iterator when it was already out of range." }
-        return _current!!.also { moveNext() }
+        check(hasCurrent()) { "Attempted to consume nothing." }
+        return current.also { moveNext() }
     }
+
+    /**
+     * See [prepend]
+     */
+    fun prepend(elem: T) =
+        prepend(sequenceOf(elem))
 
     /**
      * Moves the iterator to the first element in [elems].
@@ -62,7 +81,7 @@ class CurrentIterator<T>(private var iter: Iterator<T>) {
      */
     fun prepend(elems: Sequence<T>) {
         iter = (elems + toSequence()).iterator()
-        moveNext()
+        _currentOrDelayed = null
     }
 
     /**
@@ -75,11 +94,26 @@ class CurrentIterator<T>(private var iter: Iterator<T>) {
      * The current element is included as the first element of the returned sequence.
      */
     fun toSequence(): Sequence<T> {
-        val rest = iter.asSequence()
-        return if (_current != null) {
-            sequenceOf(_current!!) + rest
+        return if (_currentOrDelayed != null) {
+            sequenceOf(current) + iter.asSequence()
         } else {
-            rest
+            iter.asSequence() // Handles both end of range and delayed
+        }
+    }
+
+    /**
+     * Returns whether the next advance is delayed.
+     * If delayed, any use of the current element needs to advance to that element first.
+     */
+    private fun isDelayed() =
+        _currentOrDelayed == null && iter.hasNext()
+
+    /**
+     * If delayed, advances the iterator to the next element.
+     */
+    private fun moveIfDelayed() {
+        if (isDelayed()) {
+            _currentOrDelayed = iter.next()
         }
     }
 }

@@ -127,6 +127,12 @@ private class Lexer(
             generateAndUseWhileNotNull({ readToNextAcceptingNode(currentNode) }) { (nextGoodNode, read) ->
                 addAll(read)
                 currentNode = nextGoodNode
+
+                // Update the lex context here so that it's set as soon as the " is read, not when the next character is read right after this lambda finishes.
+                // This is the only thing keeping the DFA code from being in the DFA.
+                if (nextGoodNode.acceptValue == Pptok.RawStringStart) {
+                    lexContext.state = LexContext.InRawStringLiteral
+                }
             }
         }
 
@@ -146,12 +152,6 @@ private class Lexer(
             readWhileAndUseWhile(shouldRead = { (isEmpty() || currentNode.acceptValue == null) }, shouldUseValue = { currentNode[it] != null }) {
                 add(it)
                 currentNode = currentNode[it.c]!!
-
-                // Update the lex context here so that it's set as soon as the " is read, not when the next character is read right after this lambda finishes.
-                // This is the only thing keeping the DFA code from being in the DFA.
-                if (currentNode.acceptValue == Pptok.RawStringStart) {
-                    lexContext.state = LexContext.InRawStringLiteral
-                }
             }
         }
 
@@ -194,9 +194,9 @@ private class Lexer(
             callsInPlace(block)
         }
 
-        generateWhileAndUseWhile( { hasMoreInput() && shouldRead() }, { remainingInputIter.current }, { shouldUseValue(it.c) }) {
+        generateWhileAndUseWhile( { shouldRead() && hasMoreInput() }, { remainingInputIter.current }, { shouldUseValue(it.c) }) {
             block(it)
-            remainingInputIter.moveNext()
+            remainingInputIter.lazyMoveNext()
         }
     }
 
