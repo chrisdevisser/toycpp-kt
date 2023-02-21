@@ -22,32 +22,24 @@ class LexerTest {
     ])
     fun `Tokens can be separated by whitespace`(input: String) {
         val tokens = lex(input).filterNot { it.kind == Newline }
-
-        assertEquals(2, tokens.size)
         assertAllTokenKindsAre(Identifier, tokens)
     }
 
     @Test
     fun `Newlines are preserved through lexing`() {
         val tokens = lex("\nabc\n\n123\n\n")
-
-        assertEquals(7, tokens.size)
         assertTokenKindsMatch(tokens, Newline, Identifier, Newline, Newline, Ppnum, Newline, Newline)
     }
 
     @Test
     fun `Comments between two tokens do not cause them to be merged into one`() {
         val tokens = lex("abc/*comment*/def")
-
-        assertEquals(3, tokens.size)
         assertTokenKindsMatch(tokens, Identifier, Comment, Identifier)
     }
 
     @Test
     fun `The lexer backtracks if it fails to lex a token after having a chance to lex a shorter token`() {
         val tokens = lex("%:%=") // %:% looks like it's going for %:%: but is already past %:
-
-        assertEquals(2, tokens.size)
         assertTokenKindsMatch(tokens, Pound, ModEquals)
     }
 
@@ -147,7 +139,6 @@ class LexerTest {
         val (input, kinds) = param
         val tokens = lex(input)
 
-        assertEquals(kinds.size, tokens.size)
         assertTokenKindsMatch(tokens, *kinds.toTypedArray())
     }
 

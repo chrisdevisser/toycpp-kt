@@ -28,16 +28,12 @@ class CommentTest {
         """.trimMargin()
 
         val tokens = lex(input)
-
-        assertEquals(4, tokens.size)
         assertTokenKindsMatch(tokens, Identifier, Comment, Newline, Dot)
     }
 
     @Test
     fun `Block comments only ignore characters until the ending marker`() {
         val tokens = lex("test /*abc '*/ .")
-
-        assertEquals(3, tokens.size)
         assertTokenKindsMatch(tokens, Identifier, Comment, Dot)
     }
 
@@ -76,8 +72,6 @@ class CommentTest {
         """.trimMargin()
 
         val tokens = lex(input)
-
-        assertEquals(4, tokens.size)
         assertTokenKindsMatch(tokens, Comment, Newline, Times, Over)
     }
 
@@ -89,8 +83,6 @@ class CommentTest {
         """.trimMargin()
 
         val tokens = lex(input)
-
-        assertEquals(4, tokens.size)
         assertTokenKindsMatch(tokens, Comment, Newline, Times, Over)
     }
 }
