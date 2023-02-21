@@ -48,6 +48,7 @@ class RawStringLineSpliceTest {
 
     @Test
     fun `Line splices are reverted before the closing quote of a raw string literal`() {
+        // Note: This is not a valid raw string literal.
         val input = """
             |R"(abc)\
             |"
