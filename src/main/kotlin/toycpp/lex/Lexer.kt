@@ -62,7 +62,7 @@ private class Lexer(
                     // [lex.pptoken]/3.2: <:: is < ::, not <: :, if the next character is not : or >.
                     // The DFA gives back a pseudotoken and we fix it here.
                     // It can't be a separate pass because location info for the middle of the token is lost after here.
-                    yieldAll(replaceSpecialCaseTemplateToken(sourceRead, rawToken, remainingInputIter.current.c))
+                    yieldAll(replaceSpecialCaseTemplateToken(sourceRead, rawToken, remainingInputIter.currentOrNull()?.c))
                 }
 
                 Pptok.RawStringStart -> {
@@ -285,7 +285,7 @@ private class Lexer(
     private fun replaceSpecialCaseTemplateToken(lexemeChars: List<SourceChar>, token: PpToken, nextChar: Char?): List<PpToken> {
         check(lexemeChars.size == 3) { "Expected <:: pseudotoken to have 3 characters, but it has ${lexemeChars.size}." }
         with (token) {
-            return if (nextChar?.let { it in ":>" } == false) {
+            return if (nextChar?.let { it in ":>" } != true) { // No next character is treated as not in the list
                 val first = PpToken(Pptok.LessThan, lexeme.first().toString(), startLocation, lexemeChars.first().endLoc, false)
                 val second = PpToken(Pptok.ColonColon, lexeme.substring(1), lexemeChars[1].loc, endLocation, false)
                 listOf(first, second)

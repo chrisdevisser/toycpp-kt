@@ -4,37 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="950732b7-04b9-44e0-b794-751e5e1a4a66" name="Changes" comment="Add DFA selection support to lexer&#10;&#10;This experimentally allows lexing header-names based on PP context and then having header name tokens available as normal tokens.">
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/DiscardingParser.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/EndOfInput.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Conditional.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Discard.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/SeparatedBy.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/Directives.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/LeafParsers.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/LineDirective.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/MacroDefinition.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/MacroTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/Preprocessor.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/PreprocessorAst.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/UtilityParsers.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/preprocessor/directives/Import.kt" afterDir="false" />
+    <list default="true" id="950732b7-04b9-44e0-b794-751e5e1a4a66" name="Changes" comment="Start PP, basic structure">
+      <change afterPath="$PROJECT_DIR$/doc/standard notes/compiler-divergence.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/shelved-tasks.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/shelved-tasks.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/extensions/SequenceExtensions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/extensions/SequenceExtensions.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/CppDfa.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/CppDfa.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Lexer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Lexer.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Pptok.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Pptok.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Token.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Token.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/ppinterface/PpContext.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/ppinterface/PpContext.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Lit.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/Lit.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/ParseResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/ParseResult.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Not.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Not.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Or.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Or.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Then.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/Then.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/ZeroOrMore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/parser/combinators/ZeroOrMore.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/toycpp.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/toycpp.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/LexTestUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/LexTestUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lex/LexerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lex/LexerTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -278,7 +252,14 @@
       <option name="project" value="LOCAL" />
       <updated>1676826404699</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Start PP, basic structure">
+      <created>1676991823735</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1676991823735</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -297,7 +278,8 @@
     <MESSAGE value="DFA and lexer done minus bugs and raw strings, some lexer/DFA tests" />
     <MESSAGE value="Add docs back in" />
     <MESSAGE value="Pretty much done lexer&#10;&#10;Still need to lex header-names later, as well as figure out what to do with the modules stuff. There's also cleanup to do regarding error recovery and reporting." />
-    <option name="LAST_COMMIT_MESSAGE" value="Pretty much done lexer&#10;&#10;Still need to lex header-names later, as well as figure out what to do with the modules stuff. There's also cleanup to do regarding error recovery and reporting." />
+    <MESSAGE value="Start PP, basic structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start PP, basic structure" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

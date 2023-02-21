@@ -155,6 +155,7 @@ class LexerTest {
         @JvmStatic
         fun generateSpecialCaseLexInputsAndTokenKindPairs(): Stream<Pair<String, List<Pptok>>> =
             Stream.of(
+                "<::" to listOf(LessThan, ColonColon),
                 "<::abc>" to listOf(LessThan, ColonColon, Identifier, GreaterThan),
                 "<:: >" to listOf(LessThan, ColonColon, GreaterThan),
                 "<::<:>" to listOf(LessThan, ColonColon, LSquareBracket, GreaterThan),

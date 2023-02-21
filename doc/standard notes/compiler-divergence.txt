@@ -1,0 +1,16 @@
+File ending in backslash ([lex.phases]/2)
+    Should there be an implicit newline in this case so this is a line splice?
+    MSVC: yes
+    Clang, GCC: no
+    Thoughts: The wording seems like yes, but the intent seems like no.
+
+Raw string literal as include
+    MSVC: Compiles
+    Clang, GCC: Fails
+    Thoughts: It's UB because it doesn't match the grammar of the other productions.
+
+Raw string literal as import
+    Clang: Treats as import directive, expects header name
+    GCC: Treats as text line
+    MSVC: Treats as import directive, compiles
+    Thoughts: Ultimately UB again. The line is an import directive and the raw string is a string-literal token, but then gets relexed into a header-name token the same way as in a #include and doesn't match either of the two productions.
