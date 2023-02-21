@@ -1,13 +1,12 @@
 package toycpp.lex
 
-import toycpp.control_structure.generateAndUseWhile
+import toycpp.control_structure.generateAndUseWhileNotNull
 import toycpp.control_structure.generateWhileAndUseWhile
 import toycpp.dfa.Dfa
 import toycpp.dfa.DfaNode
 import toycpp.dfa.dfa
 import toycpp.diagnostics.RawStringDelimiterTooLong
 import toycpp.diagnostics.diag
-import toycpp.encoding.escapeAsciiStringForHumans
 import toycpp.iterators.CurrentIterator
 import toycpp.iterators.withCurrent
 import toycpp.lex.fixup_passes.condenseWhitespace
@@ -89,71 +88,80 @@ private class Lexer(
      */
     fun lexOneToken(): Pair<PpToken, List<SourceChar>> {
         val dfas = getDfaPriorityList()
-        require(dfas.isNotEmpty()) { "Received no valid DFAs to lex with." }
+        require(dfas.isNotEmpty()) { "Lexer received no valid DFAs to lex with." }
 
-        // Try each DFA until one succeeds, but if none succeed, use the last one
-        val invalidToken = PpToken(Pptok.InvalidToken, "", SourceLocation("",0,0), SourceLocation("",0,0), false)
-        return dfas.fold(Pair(invalidToken, emptyList())) { acc, next ->
-            val (token, sourceRead) = acc
-            if (token.kind != Pptok.InvalidToken) {
-                acc
+        val tokenInfo = dfas.firstNotNullOfOrNull { tryLexOneToken(it) }
+        require(tokenInfo != null) { "No given DFAs could lex a token. Remaining input:\n${remainingInputIter.toSequence().toText()}" }
+
+        return tokenInfo
+    }
+
+    /**
+     * Lexes one token using the given DFA.
+     *
+     * Returns the given token, or null if there is the DFA doesn't accept the input.
+     * Returns null if no input is consumed to form the token.
+     */
+    fun tryLexOneToken(dfa: CppDfa): Pair<PpToken, List<SourceChar>>? {
+        return traverseDfaToFurthestAcceptingNode(dfa)?.let { (kind, sourceConsumed) ->
+            // This is the correct place to check whether input was consumed. A DFA doesn't care.
+            if (sourceConsumed.isNotEmpty()) {
+                Pair(PpToken(kind, sourceConsumed.toText(), sourceConsumed.startLoc, sourceConsumed.endLoc), sourceConsumed)
             } else {
-                remainingInputIter.prepend(sourceRead)
-                tryLexOneToken(next)
+                null
             }
         }
     }
 
-    private fun tryLexOneToken(dfa: CppDfa): Pair<PpToken, List<SourceChar>> {
-        check(hasMoreInput()) { "Attempted to lex a token when already at the end of input." }
-
+    /**
+     * Starting at the beginning of the DFA, reads input and advances through the DFA until the furthest node that can produce a token is reached.
+     * This could be the start node.
+     *
+     * Returns both the token kind and the input consumed in this process, which could be empty.
+     * Returns null and backtracks the input if no accepting node was reached.
+     */
+    fun traverseDfaToFurthestAcceptingNode(dfa: CppDfa): Pair<Pptok, List<SourceChar>>? {
         var currentNode = dfa.start
 
-        val sourceRead = buildList {
-            generateAndUseWhile(generate = { readToNextAcceptingNode(currentNode) }, shouldUseValue = { (nextGoodNode, _) -> nextGoodNode != null }) { (nextGoodNode, read) ->
+        val sourceConsumed = buildList {
+            generateAndUseWhileNotNull({ readToNextAcceptingNode(currentNode) }) { (nextGoodNode, read) ->
                 addAll(read)
-                currentNode = nextGoodNode!!
-            }
-
-            // Would be a shame if the lexer were to get into an infinite loop...
-            // This can happen if the DFA doesn't have a transition for the first character of a token.
-            // We'll just take that character and turn it into an invalid token to be handled like the rest.
-            // Note: Simply adding the character to the list could still loop infinitely if the start node is accepting.
-            if (isEmpty() && hasMoreInput()) {
-                currentNode = DfaNode(DfaNode.Id("no input consumed"), acceptValue = null)
-                add(remainingInputIter.consume())
+                currentNode = nextGoodNode
             }
         }
 
-        // Leading whitespace is fixed in another pass
-        val token = PpToken(currentNode.acceptValue ?: Pptok.InvalidToken, sourceRead.toText(), sourceRead.startLoc, sourceRead.endLoc, hasLeadingWhitespace = false)
-        return Pair(token, sourceRead)
+        val kind = currentNode.acceptValue
+        return if (kind != null) Pair(kind, sourceConsumed) else null
     }
 
     /**
      * Starting at the given DFA node, reads input and advances through the DFA until a node is reached that can produce a token.
      *
      * Returns both the final node reached (null if no applicable node was reached) and the input consumed in this process.
+     * Returns null and backtracks the input if no accepting node was reached. This includes the case where no input is consumed.
      */
-    fun readToNextAcceptingNode(startNode: CppDfaNode): Pair<CppDfaNode?, List<SourceChar>> {
+    fun readToNextAcceptingNode(startNode: CppDfaNode): Pair<CppDfaNode, List<SourceChar>>? {
         var currentNode = startNode
-        val sourceRead = buildList {
-            readWhileAndUseWhile(shouldRead = { (this@buildList.isEmpty() || currentNode.acceptValue == null) }, shouldUseValue = { currentNode[it] != null }) {
+        val sourceConsumed = buildList {
+            readWhileAndUseWhile(shouldRead = { (isEmpty() || currentNode.acceptValue == null) }, shouldUseValue = { currentNode[it] != null }) {
                 add(it)
                 currentNode = currentNode[it.c]!!
 
-                // Update the lex context here so that it's set as soon as the " is read, not when the next character is read
+                // Update the lex context here so that it's set as soon as the " is read, not when the next character is read right after this lambda finishes.
+                // This is the only thing keeping the DFA code from being in the DFA.
                 if (currentNode.acceptValue == Pptok.RawStringStart) {
                     lexContext.state = LexContext.InRawStringLiteral
                 }
             }
         }
 
-        return if (currentNode.acceptValue != null && sourceRead.isNotEmpty()) {
-            Pair(currentNode, sourceRead)
+        return if (currentNode.acceptValue != null && sourceConsumed.isNotEmpty()) {
+            Pair(currentNode, sourceConsumed)
         } else {
-            remainingInputIter.prepend(sourceRead)
-            Pair(null, sourceRead)
+            if (sourceConsumed.isNotEmpty()) { // This check is just an optimization
+                remainingInputIter.prepend(sourceConsumed)
+            }
+            null
         }
     }
 
@@ -216,24 +224,20 @@ private class Lexer(
             return PpToken(Pptok.InvalidUnterminatedLiteral, lexeme, rawToken.startLocation, endLoc, false)
         }
 
-        if (!hasMoreInput()) {
-            return PpToken(Pptok.StringLit, rawToken.lexeme + charsIncludingEndQuote.toText(), rawToken.startLocation, charsIncludingEndQuote.endLoc)
-        }
-
-        val (possibleIdentifier, _) = tryLexOneToken(identifierDfa)
+        val (possibleIdentifier, _) = tryLexOneToken(identifierDfa) ?: Pair(null as PpToken?, emptyList())
 
         // From here, the identifier is taken as part of the token. An error could affect this, but better to lex everything if there's an error anyway.
-        val fullLexeme = rawToken.lexeme + charsIncludingEndQuote.toText() + possibleIdentifier.lexeme
+        val fullLexeme = rawToken.lexeme + charsIncludingEndQuote.toText() + (possibleIdentifier?.lexeme ?: "")
+        val endLoc = possibleIdentifier?.endLocation ?: charsIncludingEndQuote.last().endLoc
 
         // [lex.string]/1: The delimiter must be at most 16 characters.
         if (delimiter.length > 16) {
             diag(RawStringDelimiterTooLong(delimiter), rawToken.startLocation)
-            val endLoc = if (possibleIdentifier.kind == Pptok.Identifier) possibleIdentifier.endLocation else charsIncludingEndQuote.last().endLoc
             return PpToken(Pptok.InvalidToken, fullLexeme, rawToken.startLocation, endLoc, false)
         }
 
-        val kind = if (possibleIdentifier.kind == Pptok.Identifier) Pptok.StringUdl else Pptok.InvalidToken
-        return PpToken(kind, fullLexeme, rawToken.startLocation, possibleIdentifier.endLocation, false)
+        val kind = if (possibleIdentifier != null) Pptok.StringUdl else Pptok.StringLit
+        return PpToken(kind, fullLexeme, rawToken.startLocation, endLoc, false)
 
     }
 
