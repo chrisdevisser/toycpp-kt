@@ -10,7 +10,6 @@ import toycpp.diagnostics.diag
 import toycpp.encoding.escapeAsciiStringForHumans
 import toycpp.iterators.CurrentIterator
 import toycpp.iterators.withCurrent
-import toycpp.lex.check_passes.diagnoseEmptyCharacterLiterals
 import toycpp.lex.fixup_passes.condenseWhitespace
 import toycpp.lex.fixup_passes.transformAlternativeTokens
 import toycpp.location.*
@@ -20,12 +19,12 @@ import kotlin.contracts.contract
 typealias CppDfa = Dfa<Pptok>
 typealias CppDfaNode = DfaNode<Pptok>
 
-fun lazyLexPpTokens(sourceText: Sequence<SourceChar>, dfa: CppDfa, lexContext: LexContextHolder): Sequence<PpToken> =
-    lexCommon(Lexer(sourceText, dfa, lexContext))
+fun lazyLexPpTokens(sourceText: Sequence<SourceChar>, getDfaPriorityList: () -> List<CppDfa>, lexContext: LexContextHolder): Sequence<PpToken> =
+    lexCommon(Lexer(sourceText, getDfaPriorityList, lexContext))
 
 // TODO: This has problems such as one pseudotoken being two tokens
-fun lexOneAdhoc(sourceText: Sequence<SourceChar>, dfa: CppDfa, lexContext: LexContextHolder): Pair<Sequence<PpToken>, CurrentIterator<SourceChar>> {
-    val lexer = Lexer(sourceText, dfa, lexContext, maximum = 1)
+fun lexOneAdhoc(sourceText: Sequence<SourceChar>, getDfaPriorityList: () -> List<CppDfa>, lexContext: LexContextHolder): Pair<Sequence<PpToken>, CurrentIterator<SourceChar>> {
+    val lexer = Lexer(sourceText, getDfaPriorityList, lexContext, maximum = 1)
     return Pair(lexCommon(lexer), lexer.remainingInputIter)
 }
 
@@ -36,7 +35,7 @@ private fun lexCommon(lexer: Lexer): Sequence<PpToken> =
 
 private class Lexer(
     sourceText: Sequence<SourceChar>,
-    val dfa: CppDfa,
+    val getDfaPriorityList: () -> List<CppDfa>,
     val lexContext: LexContextHolder,
     val maximum: Int? = null
 ) {
@@ -89,6 +88,23 @@ private class Lexer(
      * It is unspecified whether the location of a StartOfLine pseudotoken is at the end of the preceding line or at the start of the following line.
      */
     fun lexOneToken(): Pair<PpToken, List<SourceChar>> {
+        val dfas = getDfaPriorityList()
+        require(dfas.isNotEmpty()) { "Received no valid DFAs to lex with." }
+
+        // Try each DFA until one succeeds, but if none succeed, use the last one
+        val invalidToken = PpToken(Pptok.InvalidToken, "", SourceLocation("",0,0), SourceLocation("",0,0), false)
+        return dfas.fold(Pair(invalidToken, emptyList())) { acc, next ->
+            val (token, sourceRead) = acc
+            if (token.kind != Pptok.InvalidToken) {
+                acc
+            } else {
+                remainingInputIter.prepend(sourceRead)
+                tryLexOneToken(next)
+            }
+        }
+    }
+
+    private fun tryLexOneToken(dfa: CppDfa): Pair<PpToken, List<SourceChar>> {
         check(hasMoreInput()) { "Attempted to lex a token when already at the end of input." }
 
         var currentNode = dfa.start
@@ -200,31 +216,25 @@ private class Lexer(
             return PpToken(Pptok.InvalidUnterminatedLiteral, lexeme, rawToken.startLocation, endLoc, false)
         }
 
-        val (possibleIdentifierSeq, newRemainingInputIter) = lexOneAdhoc(remainingInputIter.toSequence(), identifierDfa, lexContext)
-        remainingInputIter = newRemainingInputIter
+        if (!hasMoreInput()) {
+            return PpToken(Pptok.StringLit, rawToken.lexeme + charsIncludingEndQuote.toText(), rawToken.startLocation, charsIncludingEndQuote.endLoc)
+        }
 
-        val possibleIdentifier = possibleIdentifierSeq.toList()
-        assert(possibleIdentifier.size <= 1) { "An identifier DFA managed to parse more than one token: ${possibleIdentifier.joinToString { "'${escapeAsciiStringForHumans(it.lexeme)}'" }}" }
+        val (possibleIdentifier, _) = tryLexOneToken(identifierDfa)
 
         // From here, the identifier is taken as part of the token. An error could affect this, but better to lex everything if there's an error anyway.
-        val fullLexeme = rawToken.lexeme + charsIncludingEndQuote.toText() + possibleIdentifier.joinToString("") { it.lexeme }
+        val fullLexeme = rawToken.lexeme + charsIncludingEndQuote.toText() + possibleIdentifier.lexeme
 
         // [lex.string]/1: The delimiter must be at most 16 characters.
         if (delimiter.length > 16) {
             diag(RawStringDelimiterTooLong(delimiter), rawToken.startLocation)
-            val endLoc = if (possibleIdentifier.size == 1 && possibleIdentifier.first().kind == Pptok.Identifier) possibleIdentifier.first().endLocation else charsIncludingEndQuote.last().endLoc
+            val endLoc = if (possibleIdentifier.kind == Pptok.Identifier) possibleIdentifier.endLocation else charsIncludingEndQuote.last().endLoc
             return PpToken(Pptok.InvalidToken, fullLexeme, rawToken.startLocation, endLoc, false)
         }
 
-        return if (possibleIdentifier.size == 1) {
-            // We got a UDL or the identifier was invalid
-            // TODO: Could theoretically check UCNs earlier and guarantee a valid result here
-            val kind = if (possibleIdentifier.first().kind == Pptok.Identifier) Pptok.StringUdl else Pptok.InvalidToken
-            PpToken(kind, fullLexeme, rawToken.startLocation, possibleIdentifier.first().endLocation, false)
-        } else {
-            // We didn't get an identifier, so this is just a regular raw string
-            PpToken(Pptok.StringLit, fullLexeme, rawToken.startLocation, charsIncludingEndQuote.endLoc, false)
-        }
+        val kind = if (possibleIdentifier.kind == Pptok.Identifier) Pptok.StringUdl else Pptok.InvalidToken
+        return PpToken(kind, fullLexeme, rawToken.startLocation, possibleIdentifier.endLocation, false)
+
     }
 
     /**

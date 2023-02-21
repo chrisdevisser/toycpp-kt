@@ -71,11 +71,12 @@ enum class Pptok {
     Comma, // ,
 
     // Now the weird stuff starts
-    HeaderName, // <abc.cpp>, "abc.cpp" - Requires PP context
-    Import, // import soft keyword
-    Module, // module soft keyword
-    Export, // export soft keyword
-    OtherCharacter, // Any non-whitespace character that cannot be one of the above, i.e., \
+    AngledHeaderName, // <abc.cpp> - Created via a separate DFA used by the PP
+    QuotedHeaderName, // "abc.cpp" - Created via a separate DFA used by the PP
+    Import, // import soft keyword - Becomes a keyword when processing an import directive
+    Module, // module soft keyword - Becomes a keyword when processing a module directive
+    Export, // export soft keyword - Becomes a keyword when processing an import directive
+    OtherCharacter, // Any non-whitespace character that cannot be one of the above, i.e., \ or anything outside the BSCS
     Comment, // //foo, /*foo*/
 
     // Pseudotokens that aren't part of the language

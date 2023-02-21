@@ -1,3 +1,6 @@
+Covers:
+    [lex] but not [lex.key] or past [lex.string]
+
 Phases of translation: [lex.phases]
     1. Map characters to BSCS and add UCNs for non-BSCS characters.
     2. Splice lines. Pretend files end with a newline.
@@ -54,6 +57,7 @@ Optional Features
     -keep track of comment/whitespace info
     -when supporting utf8 source, ensure UCN replacements function identically in header-names
     -IB: if supported, values of extra escape sequences [lex.ccon]/6
+    -limits
 
 Diagnostics
     -error when source ends in partial pp token [lex.phases]/3
@@ -70,9 +74,9 @@ Diagnostics
     -error on character literal with single character not reprentable in execution character set [lex.ccon]/1
     -error if floating-point literal value is out of range [lex.fcon]
     -error if u8 string is adjacent to wide string
+    -error if import directive occurs when import is an object macro (and export if it's used)
 
 Lex
-    -condense whitespace (keep StartOfLine, remove Whitespace, remove Comment) [lex.phases]/3
     -maybe import/module/export tokens [lex.pptoken]/4
 
 PP 

@@ -55,7 +55,7 @@ sealed class ParseResult<out T, In>(
  * Coalesces a result into a success, using the provided value if called on a failure.
  */
 fun<Alt, T : Alt, In> ParseResult<T, In>.orElseSuccess(produceValue: () -> Alt): Success<Alt, In> =
-    mapEither({this}, {Success(produceValue(), remainingInput)})
+    mapEither({this}, {Success(produceValue(), remainingInput)}) // TODO: Remaining input is wrong
 
 /**
  * Transforms a failure while leaving a success alone. The transformation produces the direct result.

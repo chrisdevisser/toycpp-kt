@@ -6,9 +6,9 @@ package toycpp.lex.ppinterface
  * `<foo>` is lexed completely differently in different contexts. In a replacement list, it can
  * even be lexed both ways depending on the context of the code using the macro.
  */
-class PpContextHolder(var value: PpContext = PpContext.NothingSpecial)
+class PpContextHolder(var state: PpContext = PpContext.NothingSpecial)
 
 enum class PpContext {
     NothingSpecial,
-    InHeaderName
+    HeaderNameIsValid
 }

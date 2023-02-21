@@ -11,3 +11,12 @@ fun<T> Sequence<T>.split1(): Pair<T, Sequence<T>>? {
 
     return Pair(first, iter.asSequence())
 }
+
+fun<T> Sequence<T>.splitBy(isSeparator: (T) -> Boolean): Sequence<Sequence<T>> = sequence {
+    val iter = iterator()
+
+    while (iter.hasNext()) {
+        yield(iter.asSequence().takeWhile { !isSeparator(it) } )
+        if (iter.hasNext()) iter.next() // Skip separator
+    }
+}

@@ -3,12 +3,19 @@ package toycpp.parser
 import toycpp.extensions.split1
 import toycpp.parser.ParseResult.Failure
 import toycpp.parser.ParseResult.Success
+import toycpp.parser.combinators.get
 
-fun<In> single(): Parser<In, In> =
-    AdhocParser("single") { input ->
+fun<In> one(): Parser<In, In> =
+    AdhocParser("one") { input ->
         input.split1()?.let { (first, rest) -> Success(first, rest) }
             ?: Failure(emptySequence())
     }
+
+fun<In> oneOf(vararg options: In): Parser<In?, In> =
+    one<In>()[{it in options}] named("one of ${options.joinToString()}")
+
+fun<In> oneExcept(vararg options: In): Parser<In?, In> =
+    one<In>()[{it !in options}] named("one except ${options.joinToString()}")
 
 private fun<In, InComp> buildAnyImpl(proj: (In) -> InComp, comp: (InComp) -> Boolean): Parser<In, In> {
     fun parse(input: Sequence<In>): ParseResult<In, In> {

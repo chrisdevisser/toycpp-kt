@@ -6,6 +6,16 @@ import toycpp.dfa.dfa
 import toycpp.encoding.formFeed
 import toycpp.encoding.verticalTab
 import toycpp.lex.Pptok.*
+import toycpp.lex.ppinterface.PpContext
+import toycpp.lex.ppinterface.PpContextHolder
+
+fun chooseDfasFromPpContext(ppContext: PpContextHolder): () -> List<CppDfa> = {
+    if (ppContext.state == PpContext.HeaderNameIsValid) {
+        listOf(headerNameDfa, cppDfa)
+    } else {
+        listOf(cppDfa)
+    }
+}
 
 // TODO: Consider how to allow an unfinished escape code or UCN.
 //     It's still desirable to pretend it's valid and lex the rest of the token, but then produce an invalid token.
@@ -36,7 +46,10 @@ private val octalDigit = ('0'..'7').joinToString("")
 /**
  * A C++ DFA that models lex.pptoken and the following sections.
  */
-fun createCppDfa() = dfa {
+/**
+ * A C++ DFA that models lex.pptoken and the following sections.
+ */
+val cppDfa = dfa {
     // First comes stuff involving connecting nodes.
     // This allows said nodes to later be marked as accepting as needed.
     // The other way around doesn't work because separate nodes might already be created in the place of one.
@@ -203,6 +216,18 @@ fun createCppDfa() = dfa {
     seq("<::") accepts SpecialCaseTemplateLex // This doesn't follow maximal munch. The lexer sometimes has to produce < ::
     seq("%:") accepts Pound
     seq("%:%:") accepts Concat
+}
+
+val headerNameDfa = dfa {
+    '<' connects node("angled header") {
+        anyExcept(">\n") connects selfId
+        '>' connects acceptingNode("angled header end", AngledHeaderName)
+    }
+
+    '"' connects node("quoted header") {
+        anyExcept("\"") connects selfId
+        '"' connects acceptingNode("quoted header end", QuotedHeaderName)
+    }
 }
 
 /**

@@ -59,8 +59,7 @@ fun compileToBinary(sourcePath: Path, filesystem: Filesystem) {
     //
     // Whitespace is kept only as a token flag indicating leading whitespace.
     val ppContext = PpContextHolder(PpContext.NothingSpecial)
-    val dfa = createCppDfa()
-    val pptokens = lazyLexPpTokens(sourceWithoutLineSplices, dfa, lexContext)
+    val pptokens = lazyLexPpTokens(sourceWithoutLineSplices, chooseDfasFromPpContext(ppContext), lexContext)
         .removeComments()
         .toList()
 
