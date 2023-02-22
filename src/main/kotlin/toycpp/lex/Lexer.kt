@@ -154,10 +154,10 @@ private class Lexer(
         if (!endQuoteReached) {
             val lexeme = rawToken.lexeme + charsIncludingEndQuote.toText()
             val endLoc = if (charsIncludingEndQuote.isNotEmpty()) charsIncludingEndQuote.endLoc else rawToken.endLocation
-            return PpToken(Pptok.InvalidUnterminatedLiteral, lexeme, rawToken.startLocation, endLoc, false)
+            return PpToken(Pptok.InvalidUnterminatedLiteral, lexeme, rawToken.startLocation, endLoc)
         }
 
-        val (possibleIdentifier, _) = tryLexOneToken(identifierDfa) ?: Pair(null as PpToken?, emptyList())
+        val (possibleIdentifier, _) = tryLexOneToken(identifierDfa) ?: Pair(null, emptyList())
 
         // From here, the identifier is taken as part of the token. An error could affect this, but better to lex everything if there's an error anyway.
         val fullLexeme = rawToken.lexeme + charsIncludingEndQuote.toText() + (possibleIdentifier?.lexeme ?: "")
@@ -166,12 +166,11 @@ private class Lexer(
         // [lex.string]/1: The delimiter must be at most 16 characters.
         if (delimiter.length > 16) {
             diag(RawStringDelimiterTooLong(delimiter), rawToken.startLocation)
-            return PpToken(Pptok.InvalidToken, fullLexeme, rawToken.startLocation, endLoc, false)
+            return PpToken(Pptok.InvalidToken, fullLexeme, rawToken.startLocation, endLoc)
         }
 
         val kind = if (possibleIdentifier != null) Pptok.StringUdl else Pptok.StringLit
-        return PpToken(kind, fullLexeme, rawToken.startLocation, endLoc, false)
-
+        return PpToken(kind, fullLexeme, rawToken.startLocation, endLoc)
     }
 
     /**
@@ -220,15 +219,14 @@ private class Lexer(
      * Otherwise, returns the <: token and puts the : back into the input to start the next token.
      */
     private fun replaceSpecialCaseTemplateToken(lexemeChars: List<SourceChar>, token: PpToken, nextChar: Char?): List<PpToken> {
-        check(lexemeChars.size == 3) { "Expected <:: pseudotoken to have 3 characters, but it has ${lexemeChars.size}." }
+        check(lexemeChars.toText() == "<::") { "<:: pseudotoken was actually '${lexemeChars.toText()}'." }
         with (token) {
             return if (nextChar?.let { it in ":>" } != true) { // No next character is treated as not in the list
-                val first = PpToken(Pptok.LessThan, lexeme.first().toString(), startLocation, lexemeChars.first().endLoc, false)
-                val second = PpToken(Pptok.ColonColon, lexeme.substring(1), lexemeChars[1].loc, endLocation, false)
+                val first = PpToken(Pptok.LessThan, lexeme.first().toString(), startLocation, lexemeChars.first().endLoc)
+                val second = PpToken(Pptok.ColonColon, lexeme.substring(1), lexemeChars[1].loc, endLocation)
                 listOf(first, second)
             } else {
-                val endLocOfFirst = lexemeChars[1].endLoc
-                val digraph = PpToken(Pptok.LSquareBracket, lexeme.substring(0, 2), startLocation, endLocOfFirst, false)
+                val digraph = PpToken(Pptok.LSquareBracket, lexeme.substring(0, 2), startLocation, lexemeChars[1].endLoc)
 
                 remainingInputIter.prepend(sequenceOf(lexemeChars.last())) // Backtrack so that the colon can be used for the next token
                 listOf(digraph)

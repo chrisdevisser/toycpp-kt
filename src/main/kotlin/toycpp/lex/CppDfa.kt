@@ -218,6 +218,7 @@ val cppDfa = dfa {
     seq("%:%:") accepts Concat
 }
 
+// TODO: Detect unterminated header-names the same way as literals. In all contexts where this is used, a failure is UB.
 val headerNameDfa = dfa {
     '<' connects node("angled header") {
         anyExcept(">\n") connects selfId
