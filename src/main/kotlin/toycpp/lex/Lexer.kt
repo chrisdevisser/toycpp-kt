@@ -1,9 +1,6 @@
 package toycpp.lex
 
-import toycpp.control_structure.generateAndUseWhileNotNull
-import toycpp.control_structure.generateWhileAndUseWhile
 import toycpp.dfa.Dfa
-import toycpp.dfa.DfaNode
 import toycpp.dfa.dfa
 import toycpp.dfa.traverseDfaToFurthestAcceptingNode
 import toycpp.diagnostics.RawStringDelimiterTooLong
@@ -13,12 +10,12 @@ import toycpp.iterators.readWhileAndUseWhile
 import toycpp.iterators.withCurrent
 import toycpp.lex.fixup_passes.condenseWhitespace
 import toycpp.lex.fixup_passes.transformAlternativeTokens
-import toycpp.location.*
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+import toycpp.location.SourceChar
+import toycpp.location.endLoc
+import toycpp.location.startLoc
+import toycpp.location.toText
 
 typealias CppDfa = Dfa<Pptok>
-typealias CppDfaNode = DfaNode<Pptok>
 
 fun lazyLexPpTokens(sourceText: Sequence<SourceChar>, getDfaPriorityList: () -> List<CppDfa>, lexContext: LexContextHolder): Sequence<PpToken> =
     lexCommon(Lexer(sourceText, getDfaPriorityList, lexContext))
@@ -50,12 +47,10 @@ private class Lexer(
      * - RawStringStart pseudotokens are taken and finished in the lexer to produce either a StringLit or InvalidToken token.
      */
     fun lex(): Sequence<PpToken> = sequence {
-        if (!hasMoreInput()) return@sequence // Being inside the sequence builder means that input is not touched until the returned sequence is
-
         var tokenCount = 0
 
         while (hasMoreInput() && (maximum == null || tokenCount < maximum)) {
-            val (rawToken, sourceRead) = lexOneToken()
+            val (rawToken, sourceConsumed) = lexOneToken()
             ++tokenCount
 
             when (rawToken.kind) {
@@ -63,7 +58,7 @@ private class Lexer(
                     // [lex.pptoken]/3.2: <:: is < ::, not <: :, if the next character is not : or >.
                     // The DFA gives back a pseudotoken and we fix it here.
                     // It can't be a separate pass because location info for the middle of the token is lost after here.
-                    yieldAll(replaceSpecialCaseTemplateToken(sourceRead, rawToken, remainingInputIter.currentOrNull()?.c))
+                    yieldAll(replaceSpecialCaseTemplateToken(sourceConsumed, rawToken, remainingInputIter.currentOrNull()?.c))
                 }
 
                 Pptok.RawStringStart -> {
@@ -101,13 +96,15 @@ private class Lexer(
     /**
      * Lexes one token using the given DFA.
      *
+     * If the start of a raw string literal is encountered, updates the lex context to reflect that.
+     * This is done before the character after the opening " is read.
+     *
      * Returns the given token, or null if there is the DFA doesn't accept the input.
      * Returns null if no input is consumed to form the token.
      */
     fun tryLexOneToken(dfa: CppDfa): Pair<PpToken, List<SourceChar>>? {
         val result = traverseDfaToFurthestAcceptingNode(remainingInputIter.toSequence(), dfa, { it.c }) {
-            // Update the lex context here so that it's set as soon as the " is read, not when the next character is read right after this lambda finishes.
-            // This is the only thing keeping the DFA code from being in the DFA.
+            // Update the lex context here so that it's set as soon as the " is read, not after reading the next character
             if (it == Pptok.RawStringStart) {
                 lexContext.state = LexContext.InRawStringLiteral
             }
