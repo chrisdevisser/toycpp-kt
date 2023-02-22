@@ -1,5 +1,9 @@
 package toycpp.iterators
 
+import toycpp.control_structure.generateWhileAndUseWhile
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * Acts similarly to a C++ iterator. When in range, [current] is not null and can be used repeatedly.
  * When out of range, [current] is null and no more iteration can be done.
@@ -124,3 +128,38 @@ class CurrentIterator<T>(private var iter: Iterator<T>) {
  * @see [CurrentIterator]
  */
 fun<T> Iterator<T>.withCurrent() = CurrentIterator(this)
+
+    /**
+     * Reads one element per iteration, starting with the current element.
+     * If [shouldUseValue] passes for the element, calls [block] with the element and consumes the element.
+     *
+     * Finishes iteration as soon as [shouldUseValue] returns false.
+     */
+    inline fun<T> CurrentIterator<T>.readAndUseWhile(shouldUseValue: (T) -> Boolean, block: (T) -> Unit) {
+        contract {
+            callsInPlace(shouldUseValue)
+            callsInPlace(block)
+        }
+
+        readWhileAndUseWhile({ true }, shouldUseValue, block)
+    }
+
+    /**
+     * Before each iteration, pre-emptively finishes iteration if [shouldRead] returns false.
+     * Reads one element per iteration, starting with the current element.
+     * If [shouldUseValue] passes for the element, calls [block] with the element and consumes the element.
+     *
+     * Also finishes iteration as soon as [shouldUseValue] returns false.
+     */
+    inline fun<T> CurrentIterator<T>.readWhileAndUseWhile(shouldRead: () -> Boolean, shouldUseValue: (T) -> Boolean, block: (T) -> Unit) {
+        contract {
+            callsInPlace(shouldRead, InvocationKind.AT_LEAST_ONCE)
+            callsInPlace(shouldUseValue)
+            callsInPlace(block)
+        }
+
+        generateWhileAndUseWhile({ shouldRead() && hasCurrent() }, { current }, { shouldUseValue(it) }) {
+            block(it)
+            lazyMoveNext()
+        }
+    }

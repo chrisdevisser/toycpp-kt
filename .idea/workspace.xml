@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="950732b7-04b9-44e0-b794-751e5e1a4a66" name="Changes" comment="Remove redundant length checks from some tests">
+    <list default="true" id="950732b7-04b9-44e0-b794-751e5e1a4a66" name="Changes" comment="Delay reading input in lexer&#10;&#10;The main effect of this is to sync the read input with the consumed input as much as possible, which allows raw string literal line splice detection to be moved to its logical place.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/Dfa.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/dfa/Dfa.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/iterators/CurrentIterator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/iterators/CurrentIterator.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Lexer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/toycpp/lex/Lexer.kt" afterDir="false" />
     </list>
@@ -286,7 +287,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677021205978</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Delay reading input in lexer&#10;&#10;The main effect of this is to sync the read input with the consumed input as much as possible, which allows raw string literal line splice detection to be moved to its logical place.">
+      <created>1677023627405</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1677023627405</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -310,7 +318,8 @@
     <MESSAGE value="Use Java-style iterator in lexer&#10;&#10;The model changes from eagerly being on the next element to always being behind the next element. The biggest impact is the lowest level of reading characters, where this version can avoid reading from the input too early before the next input is used. However, it makes the logic more difficult elsewhere and requires undoing a read of input every time the DFA finishes a token." />
     <MESSAGE value="Add note to test" />
     <MESSAGE value="Remove redundant length checks from some tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove redundant length checks from some tests" />
+    <MESSAGE value="Delay reading input in lexer&#10;&#10;The main effect of this is to sync the read input with the consumed input as much as possible, which allows raw string literal line splice detection to be moved to its logical place." />
+    <option name="LAST_COMMIT_MESSAGE" value="Delay reading input in lexer&#10;&#10;The main effect of this is to sync the read input with the consumed input as much as possible, which allows raw string literal line splice detection to be moved to its logical place." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

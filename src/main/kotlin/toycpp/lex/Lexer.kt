@@ -5,9 +5,11 @@ import toycpp.control_structure.generateWhileAndUseWhile
 import toycpp.dfa.Dfa
 import toycpp.dfa.DfaNode
 import toycpp.dfa.dfa
+import toycpp.dfa.traverseDfaToFurthestAcceptingNode
 import toycpp.diagnostics.RawStringDelimiterTooLong
 import toycpp.diagnostics.diag
 import toycpp.iterators.CurrentIterator
+import toycpp.iterators.readWhileAndUseWhile
 import toycpp.iterators.withCurrent
 import toycpp.lex.fixup_passes.condenseWhitespace
 import toycpp.lex.fixup_passes.transformAlternativeTokens
@@ -103,64 +105,20 @@ private class Lexer(
      * Returns null if no input is consumed to form the token.
      */
     fun tryLexOneToken(dfa: CppDfa): Pair<PpToken, List<SourceChar>>? {
-        return traverseDfaToFurthestAcceptingNode(dfa)?.let { (kind, sourceConsumed) ->
-            // This is the correct place to check whether input was consumed. A DFA doesn't care.
-            if (sourceConsumed.isNotEmpty()) {
-                Pair(PpToken(kind, sourceConsumed.toText(), sourceConsumed.startLoc, sourceConsumed.endLoc), sourceConsumed)
-            } else {
-                null
+        val result = traverseDfaToFurthestAcceptingNode(remainingInputIter.toSequence(), dfa, { it.c }) {
+            // Update the lex context here so that it's set as soon as the " is read, not when the next character is read right after this lambda finishes.
+            // This is the only thing keeping the DFA code from being in the DFA.
+            if (it == Pptok.RawStringStart) {
+                lexContext.state = LexContext.InRawStringLiteral
             }
-        }
-    }
+        } ?: return null
 
-    /**
-     * Starting at the beginning of the DFA, reads input and advances through the DFA until the furthest node that can produce a token is reached.
-     * This could be the start node.
-     *
-     * Returns both the token kind and the input consumed in this process, which could be empty.
-     * Returns null and backtracks the input if no accepting node was reached.
-     */
-    fun traverseDfaToFurthestAcceptingNode(dfa: CppDfa): Pair<Pptok, List<SourceChar>>? {
-        var currentNode = dfa.start
+        val (kind, sourceConsumed, remainingInput) = result
+        remainingInputIter = remainingInput.iterator().withCurrent()
 
-        val sourceConsumed = buildList {
-            generateAndUseWhileNotNull({ readToNextAcceptingNode(currentNode) }) { (nextGoodNode, read) ->
-                addAll(read)
-                currentNode = nextGoodNode
-
-                // Update the lex context here so that it's set as soon as the " is read, not when the next character is read right after this lambda finishes.
-                // This is the only thing keeping the DFA code from being in the DFA.
-                if (nextGoodNode.acceptValue == Pptok.RawStringStart) {
-                    lexContext.state = LexContext.InRawStringLiteral
-                }
-            }
-        }
-
-        val kind = currentNode.acceptValue
-        return if (kind != null) Pair(kind, sourceConsumed) else null
-    }
-
-    /**
-     * Starting at the given DFA node, reads input and advances through the DFA until a node is reached that can produce a token.
-     *
-     * Returns both the final node reached (null if no applicable node was reached) and the input consumed in this process.
-     * Returns null and backtracks the input if no accepting node was reached. This includes the case where no input is consumed.
-     */
-    fun readToNextAcceptingNode(startNode: CppDfaNode): Pair<CppDfaNode, List<SourceChar>>? {
-        var currentNode = startNode
-        val sourceConsumed = buildList {
-            readWhileAndUseWhile(shouldRead = { (isEmpty() || currentNode.acceptValue == null) }, shouldUseValue = { currentNode[it] != null }) {
-                add(it)
-                currentNode = currentNode[it.c]!!
-            }
-        }
-
-        return if (currentNode.acceptValue != null && sourceConsumed.isNotEmpty()) {
-            Pair(currentNode, sourceConsumed)
+        return if (sourceConsumed.isNotEmpty()) {
+            Pair(PpToken(kind, sourceConsumed.toText(), sourceConsumed.startLoc, sourceConsumed.endLoc), sourceConsumed)
         } else {
-            if (sourceConsumed.isNotEmpty()) { // This check is just an optimization
-                remainingInputIter.prepend(sourceConsumed)
-            }
             null
         }
     }
@@ -172,12 +130,7 @@ private class Lexer(
      * Finishes iteration as soon as [shouldUseValue] returns false.
      */
     inline fun readAndUseWhile(shouldUseValue: (Char) -> Boolean, block: (SourceChar) -> Unit) {
-        contract {
-            callsInPlace(shouldUseValue)
-            callsInPlace(block)
-        }
-
-        readWhileAndUseWhile( { true }, shouldUseValue, block)
+        readWhileAndUseWhile({ true }, shouldUseValue, block)
     }
 
     /**
@@ -188,16 +141,7 @@ private class Lexer(
      * Also finishes iteration as soon as [shouldUseValue] returns false.
      */
     inline fun readWhileAndUseWhile(shouldRead: () -> Boolean, shouldUseValue: (Char) -> Boolean, block: (SourceChar) -> Unit) {
-        contract {
-            callsInPlace(shouldRead, InvocationKind.AT_LEAST_ONCE)
-            callsInPlace(shouldUseValue)
-            callsInPlace(block)
-        }
-
-        generateWhileAndUseWhile( { shouldRead() && hasMoreInput() }, { remainingInputIter.current }, { shouldUseValue(it.c) }) {
-            block(it)
-            remainingInputIter.lazyMoveNext()
-        }
+        remainingInputIter.readWhileAndUseWhile(shouldRead, { shouldUseValue(it.c) }, block)
     }
 
     /**
