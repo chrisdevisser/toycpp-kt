@@ -5,7 +5,6 @@ import toycpp.dfa.dfa
 import toycpp.dfa.traverseDfaToFurthestAcceptingNode
 import toycpp.diagnostics.RawStringDelimiterTooLong
 import toycpp.diagnostics.diag
-import toycpp.iterators.CurrentIterator
 import toycpp.iterators.readWhileAndUseWhile
 import toycpp.iterators.withCurrent
 import toycpp.lex.fixup_passes.condenseWhitespace
@@ -20,12 +19,6 @@ typealias CppDfa = Dfa<Pptok>
 fun lazyLexPpTokens(sourceText: Sequence<SourceChar>, getDfaPriorityList: () -> List<CppDfa>, lexContext: LexContextHolder): Sequence<PpToken> =
     lexCommon(Lexer(sourceText, getDfaPriorityList, lexContext))
 
-// TODO: This has problems such as one pseudotoken being two tokens
-fun lexOneAdhoc(sourceText: Sequence<SourceChar>, getDfaPriorityList: () -> List<CppDfa>, lexContext: LexContextHolder): Pair<Sequence<PpToken>, CurrentIterator<SourceChar>> {
-    val lexer = Lexer(sourceText, getDfaPriorityList, lexContext, maximum = 1)
-    return Pair(lexCommon(lexer), lexer.remainingInputIter)
-}
-
 private fun lexCommon(lexer: Lexer): Sequence<PpToken> =
     lexer.lex()
         .condenseWhitespace()
@@ -35,21 +28,20 @@ private class Lexer(
     sourceText: Sequence<SourceChar>,
     val getDfaPriorityList: () -> List<CppDfa>,
     val lexContext: LexContextHolder,
-    val maximum: Int? = null
 ) {
     var remainingInputIter = sourceText.iterator().withCurrent()
 
     /**
      * Converts the input to a sequence of pptokens. This transformation is specified by [dfa].
      * Beyond the DFA, there are adjustments:
-     * - Unless the lexer is adhoc, a StartOfLine token is produced at the start of input.
      * - SpecialCaseTemplateLex (<::) pseudotokens produce < :: if the next character is not : or >, otherwise <: with the last : starting the next token.
      * - RawStringStart pseudotokens are taken and finished in the lexer to produce either a StringLit or InvalidToken token.
+     * - [lexContext] is updated when entering and exiting the quoted part of a raw string literal.
      */
     fun lex(): Sequence<PpToken> = sequence {
         var tokenCount = 0
 
-        while (hasMoreInput() && (maximum == null || tokenCount < maximum)) {
+        while (hasMoreInput()) {
             val (rawToken, sourceConsumed) = lexOneToken()
             ++tokenCount
 
@@ -108,9 +100,9 @@ private class Lexer(
             if (it == Pptok.RawStringStart) {
                 lexContext.state = LexContext.InRawStringLiteral
             }
-        } ?: return null
+        }
 
-        val (kind, sourceConsumed, remainingInput) = result
+        val (kind, sourceConsumed, remainingInput) = result ?: return null
         remainingInputIter = remainingInput.iterator().withCurrent()
 
         return if (sourceConsumed.isNotEmpty()) {
